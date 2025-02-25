@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="45" fill="#9333EA" />
+  
+  <!-- Face -->
+  <circle cx="50" cy="50" r="35" fill="#ffffff" />
+  
+  <!-- Nietzsche's distinctive mustache and hair -->
+  <!-- Hair -->
+  <path d="M25 35 Q40 15 60 15 Q75 20 75 40" fill="none" stroke="#333333" stroke-width="3" />
+  <path d="M30 25 Q40 10 60 10 Q70 15 70 30" fill="none" stroke="#333333" stroke-width="2" />
+  
+  <!-- Distinctive large mustache -->
+  <path d="M35 55 Q50 65 65 55" fill="none" stroke="#333333" stroke-width="4" />
+  <path d="M30 55 Q50 70 70 55" fill="none" stroke="#333333" stroke-width="3" />
+  
+  <!-- Eyes - intense gaze -->
+  <circle cx="40" cy="45" r="3" fill="#333333" />
+  <circle cx="60" cy="45" r="3" fill="#333333" />
+  
+  <!-- Expressive eyebrows -->
+  <path d="M32 38 Q40 33 48 38" fill="none" stroke="#333333" stroke-width="2.5" />
+  <path d="M52 38 Q60 33 68 38" fill="none" stroke="#333333" stroke-width="2.5" />
+  
+  <!-- Nose -->
+  <path d="M50 45 Q45 55 50 60" fill="none" stroke="#333333" stroke-width="2" />
+  
+  <!-- Mouth - serious expression -->
+  <path d="M42 62 Q50 60 58 62" fill="none" stroke="#333333" stroke-width="2" />
+</svg>

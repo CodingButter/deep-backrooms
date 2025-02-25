@@ -1,21 +1,242 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@plugin "tailwindcss-animate";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@custom-variant dark (&:is(.dark *));
+
+/* Default design tokens defined via @theme.
+   All color tokens now start with --color- so that Tailwind can generate
+   corresponding utilities for them.
+*/
+@theme {
+  --color-background: 0 0% 100%;
+  --color-foreground: 222.2 84% 4.9%;
+  
+  --color-card: 0 0% 100%;
+  --color-card-foreground: 222.2 84% 4.9%;
+  
+  --color-popover: 0 0% 100%;
+  --color-popover-foreground: 222.2 84% 4.9%;
+  
+  --color-primary: 262.1 83.3% 57.8%;
+  --color-primary-foreground: 210 40% 98%;
+  
+  --color-secondary: 210 40% 96.1%;
+  --color-secondary-foreground: 222.2 47.4% 11.2%;
+  
+  --color-muted: 210 40% 96.1%;
+  --color-muted-foreground: 215.4 16.3% 46.9%;
+  
+  --color-accent: 210 40% 96.1%;
+  --color-accent-foreground: 222.2 47.4% 11.2%;
+  
+  --color-destructive: 0 84.2% 60.2%;
+  --color-destructive-foreground: 210 40% 98%;
+  
+  --color-border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 222.2 84% 4.9%;
+  
+  --radius: 0.5rem;
+  
+  /* Scrollbar Colors */
+  --color-scrollbar-track: 210 40% 96.1%;
+  --color-scrollbar-thumb: 215.4 16.3% 76.9%;
+  --color-scrollbar-thumb-hover: 215.4 16.3% 66.9%;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Alternative theme overrides */
+.dark {
+  --color-background: 222.2 84% 4.9%;
+  --color-foreground: 210 40% 98%;
+  
+  --color-card: 222.2 84% 4.9%;
+  --color-card-foreground: 210 40% 98%;
+  
+  --color-popover: 222.2 84% 4.9%;
+  --color-popover-foreground: 210 40% 98%;
+  
+  --color-primary: 262.1 83.3% 57.8%;
+  --color-primary-foreground: 210 40% 98%;
+  
+  --color-secondary: 217.2 32.6% 17.5%;
+  --color-secondary-foreground: 210 40% 98%;
+  
+  --color-muted: 217.2 32.6% 17.5%;
+  --color-muted-foreground: 215 20.2% 65.1%;
+  
+  --color-accent: 217.2 32.6% 17.5%;
+  --color-accent-foreground: 210 40% 98%;
+  
+  --color-destructive: 0 62.8% 30.6%;
+  --color-destructive-foreground: 210 40% 98%;
+  
+  --color-border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 212.7 26.8% 83.9%;
+  
+  /* Scrollbar Colors */
+  --color-scrollbar-track: 217.2 32.6% 12.5%;
+  --color-scrollbar-thumb: 215.4 16.3% 36.9%;
+  --color-scrollbar-thumb-hover: 215.4 16.3% 46.9%;
+}
+
+.backrooms {
+  --color-background: 45 30% 94%;
+  --color-foreground: 20 14.3% 4.1%;
+  
+  --color-card: 60 15% 94%;
+  --color-card-foreground: 20 14.3% 4.1%;
+  
+  --color-popover: 45 30% 94%;
+  --color-popover-foreground: 20 14.3% 4.1%;
+  
+  --color-primary: 40 63.6% 50.8%;
+  --color-primary-foreground: 26 83.3% 14.1%;
+  
+  --color-secondary: 60 4.8% 95.9%;
+  --color-secondary-foreground: 24 9.8% 10%;
+  
+  --color-muted: 60 4.8% 95.9%;
+  --color-muted-foreground: 25 5.3% 44.7%;
+  
+  --color-accent: 60 4.8% 95.9%;
+  --color-accent-foreground: 24 9.8% 10%;
+  
+  --color-destructive: 0 84.2% 60.2%;
+  --color-destructive-foreground: 60 9.1% 97.8%;
+  
+  --color-border: 20 5.9% 90%;
+  --input: 20 5.9% 90%;
+  --ring: 35 91% 32.9%;
+  
+  --radius: 0.125rem;
+  
+  /* Scrollbar Colors */
+  --color-scrollbar-track: 45 20% 88%;
+  --color-scrollbar-thumb: 40 53.6% 45.8%;
+  --color-scrollbar-thumb-hover: 40 53.6% 40.8%;
+}
+
+.neon {
+  --color-background: 240 10% 3.9%;
+  --color-foreground: 0 0% 98%;
+  
+  --color-card: 240 10% 3.9%;
+  --color-card-foreground: 0 0% 98%;
+  
+  --color-popover: 240 10% 3.9%;
+  --color-popover-foreground: 0 0% 98%;
+  
+  --color-primary: 326 100% 60%;
+  --color-primary-foreground: 0 0% 98%;
+  
+  --color-secondary: 196 100% 50%;
+  --color-secondary-foreground: 0 0% 98%;
+  
+  --color-muted: 240 3.7% 15.9%;
+  --color-muted-foreground: 240 5% 64.9%;
+  
+  --color-accent: 142 71% 45%;
+  --color-accent-foreground: 0 0% 98%;
+  
+  --color-destructive: 0 62.8% 30.6%;
+  --color-destructive-foreground: 0 0% 98%;
+  
+  --color-border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --ring: 326 100% 60%;
+  
+  --radius: 0;
+  
+  /* Scrollbar Colors */
+  --color-scrollbar-track: 240 10% 8.9%;
+  --color-scrollbar-thumb: 326 100% 50%;
+  --color-scrollbar-thumb-hover: 326 100% 60%;
+}
+
+/* New Electric Theme inspired by Dreams of an Electric Mind */
+.electric {
+  --color-background: 230 15% 4%;      /* Ultra-dark blue-black */
+  --color-foreground: 210 100% 95%;      /* Off-white for high contrast */
+  
+  --color-card: 230 15% 8%;              /* Slightly lighter background for cards */
+  --color-card-foreground: 210 100% 95%;
+  
+  --color-popover: 230 15% 8%;
+  --color-popover-foreground: 210 100% 95%;
+  
+  --color-primary: 210 100% 50%;         /* Electric blue */
+  --color-primary-foreground: 210 100% 95%;
+  
+  --color-secondary: 270 100% 50%;         /* Vibrant purple */
+  --color-secondary-foreground: 210 100% 95%;
+  
+  --color-muted: 210 10% 20%;            /* Dark gray */
+  --color-muted-foreground: 210 100% 95%;
+  
+  --color-accent: 330 100% 55%;          /* Neon pink */
+  --color-accent-foreground: 210 100% 95%;
+  
+  --color-destructive: 0 100% 50%;        /* Vivid red */
+  --color-destructive-foreground: 210 100% 95%;
+  
+  --color-border: 210 10% 10%;           /* Subtle dark border */
+  --input: 210 10% 10%;
+  --ring: 210 100% 50%;                 /* Electric blue ring */
+  
+  --radius: 0.5rem;
+  
+  /* Electric theme Scrollbar Colors */
+  --color-scrollbar-track: 230 15% 6%;      /* Darker than background */
+  --color-scrollbar-thumb: 210 100% 50%;      /* Matching primary */
+  --color-scrollbar-thumb-hover: 210 100% 60%;
+}
+
+/* Base styles using the generated tokens via arbitrary value utilities */
+@layer base {
+  * {
+    @apply border-[hsl(var(--color-border))];
   }
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    @apply bg-[hsl(var(--color-background))] text-[hsl(var(--color-foreground))];
+  }
+  
+  /* Custom Scrollbar Styling */
+  ::-webkit-scrollbar {
+    width: 14px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--color-scrollbar-track));
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--color-scrollbar-thumb));
+    border-radius: 6px;
+    border: 3px solid hsl(var(--color-scrollbar-track));
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--color-scrollbar-thumb-hover));
+  }
+  
+  /* Firefox scrollbar styling */
+  * {
+    scrollbar-color: hsl(var(--color-scrollbar-thumb)) hsl(var(--color-scrollbar-track));
+    scrollbar-width: thin;
+  }
+  
+  /* Add a subtle glow to scrollbar in neon theme */
+  .neon::-webkit-scrollbar-thumb {
+    box-shadow: 0 0 8px hsl(var(--color-primary));
+  }
+  
+  /* Thin scrollbar for conversation container */
+  .conversation-container::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .conversation-container::-webkit-scrollbar-thumb {
+    border: 2px solid hsl(var(--color-scrollbar-track));
+  }
 }

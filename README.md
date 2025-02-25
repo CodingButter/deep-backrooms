@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Deep Backrooms
 
-## Getting Started
+A recreation of the Infinite Backrooms experience, allowing users to create, customize, and pair AI agents for unique conversations.
 
-First, run the development server:
+## 🧠 Features
+
+- **Provider Management**: Connect to multiple AI providers (OpenAI, Anthropic, etc.)
+- **Agent Creation**: Design your own AI agents with custom personalities
+- **Agent Pairing**: Create conversations between multiple AI agents
+- **Visual Interface**: Spatial representation of conversations in a "backrooms" aesthetic
+
+## 📋 Prerequisites
+
+- Node.js 18+ and npm/pnpm
+- Turso account for database
+- OpenAI API key (and optionally other provider keys)
+
+## 🚀 Quick Start
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Clone the repository
+git clone https://github.com/codingbutter/deep-backrooms.git
+cd deep-backrooms
+
+# Install dependencies
+pnpm install
+
+# Set up environment (see .env.example)
+cp .env.example .env.local
+# Edit .env.local with your credentials
+
+# Initialize database
+pnpm run db:generate
+pnpm run db:migrate
+
+# Start development server
+pnpm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The application will be available at [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📚 Documentation
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- [Installation Guide](./docs/installation.md)
+- [Creating Providers and Agents](./docs/providers-agents.md)
 
-## Learn More
+## 🛠️ Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+- **`/app`**: Next.js app router pages and API routes
+- **`/components`**: React components
+- **`/db`**: Database schema and utilities
+- **`/lib`**: Utility functions and service integrations
+- **`/zod-schema`**: Zod validation schemas
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🔄 Database Migrations
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+# Generate migrations
+pnpm run db:generate
 
-## Deploy on Vercel
+# Apply migrations
+pnpm run db:migrate
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# View database contents
+pnpm run db:studio
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgements
+
+- [Dreams of an Electric Mind](https://dreams-of-an-electric-mind.webflow.io/) for the original Infinite Backrooms concept
+- [Next.js](https://nextjs.org/) for the application framework
+- [Turso](https://turso.tech/) for the database
+- [OpenAI](https://openai.com/) for the AI integration
