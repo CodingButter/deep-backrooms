@@ -16,7 +16,6 @@ export function ThemeToggle() {
     { value: "dark", label: "Dark", icon: "🌙" },
     { value: "backrooms", label: "Backrooms", icon: "🚪" },
     { value: "neon", label: "Neon", icon: "💜" },
-    { value: "electric", label: "Electric", icon: "⚡" },
     { value: "system", label: "System", icon: "💻" },
   ]
 
@@ -61,7 +60,7 @@ export function ThemeToggle() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="absolute right-0 mt-2 w-40 z-50 rounded-md shadow-lg border border-border bg-[hsl(var(--color-card))] overflow-hidden electric:shadow-[0_0_15px_rgba(138,43,226,0.3)]"
+            className="absolute right-0 mt-2 w-40 z-50 rounded-md shadow-lg border border-border bg-card overflow-hidden electric:shadow-[0_0_15px_rgba(138,43,226,0.3)]"
           >
             <div className="py-1" role="menu" aria-orientation="vertical">
               {themeOptions.map((option) => (
