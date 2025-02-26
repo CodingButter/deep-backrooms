@@ -1,7 +1,7 @@
 // zod-schema/index.ts
 // ...existing code...
 
-import { accounts, sessions, verificationTokens, authenticators, aiAgents, conversations, conversationAgents, users, providers } from "@/db/schema"
+import { accounts, sessions, verificationTokens,authenticators, aiAgents, conversations, conversationAgents, users, providers, } from "@/db/schema"
 import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import * as z from "zod"
 
@@ -30,14 +30,12 @@ export const insertAccountSchema = createInsertSchema(accounts, {
 })
 export const selectAccountSchema = createSelectSchema(accounts)
 
-// For "sessions" table
 export const insertSessionSchema = createInsertSchema(sessions, {
   sessionToken: z.string().min(1, "Session token is required"),
   userId: z.string().uuid("Invalid user ID format"),
-  expires: z.number().min(Date.now(), "Expiration date must be in the future"),
+  expires: z.date().min(new Date(), "Expiration date must be in the future"),
 })
 export const selectSessionSchema = createSelectSchema(sessions)
-
 // For "verificationTokens" table
 export const insertVerificationTokenSchema = createInsertSchema(verificationTokens, {
   identifier: z.string().min(1, "Identifier is required").email("Identifier must be a valid email"),
@@ -305,3 +303,4 @@ export const messageSchema = z.object({
 
 // Schema for validating an array of messages
 export const messagesArraySchema = z.array(messageSchema);
+

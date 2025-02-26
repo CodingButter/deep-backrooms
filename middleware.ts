@@ -1,38 +1,39 @@
-import { auth } from '@/auth';
+// middleware.ts
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { auth } from '@/auth';
 
 export async function middleware(request: NextRequest) {
   const session = await auth();
   const { pathname } = request.nextUrl;
 
-  // If user is signed in and tries to access auth pages, redirect to dashboard
-  if (session && (pathname.startsWith('/auth/signin') || pathname === '/auth/login')) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+  // Protected paths that require authentication
+  const protectedPaths = ['/dashboard', '/agents', '/providers', '/conversations', '/backrooms'];
+  const isProtectedPath = protectedPaths.some(path => pathname.startsWith(path));
+
+  // If the user is not logged in and trying to access a protected path, redirect to login
+  if (!session && isProtectedPath) {
+    const signInUrl = new URL('/auth/signin', request.url);
+    signInUrl.searchParams.set('callbackUrl', request.url);
+    return NextResponse.redirect(signInUrl);
   }
 
-  // If user isn't signed in and tries to access protected pages, redirect to login
-  if (!session && 
-      (pathname.startsWith('/dashboard') || 
-       pathname.startsWith('/agents') || 
-       pathname.startsWith('/providers') || 
-       pathname.startsWith('/conversations') || 
-       pathname.startsWith('/backrooms'))) {
-    return NextResponse.redirect(new URL('/auth/signin', request.url));
+  // If user is logged in and trying to access sign-in page, redirect to dashboard
+  if (session && pathname === '/auth/signin') {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
   return NextResponse.next();
 }
 
-// Only run middleware on pages that might need auth checks
+// Only run middleware on paths that might need authentication checks
 export const config = {
   matcher: [
-    '/dashboard/:path*', 
-    '/agents/:path*', 
-    '/providers/:path*', 
-    '/conversations/:path*', 
+    '/dashboard/:path*',
+    '/agents/:path*',
+    '/providers/:path*',
+    '/conversations/:path*',
     '/backrooms/:path*',
-    '/auth/signin',
-    '/auth/login'
+    '/auth/signin'
   ],
-}
+};
