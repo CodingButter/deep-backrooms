@@ -91,4 +91,3 @@ async function getProviderHandler(baseUrl: string) {
     const { default: genericHandler } = await import('@/lib/providers/generic');
     return genericHandler;
   }
-}

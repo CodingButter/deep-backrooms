@@ -74,7 +74,7 @@ function AgentCard({ agent }: { agent: Agent }) {
 
   return (
     <Card className="overflow-hidden">
-      <div className="h-2 bg-primary" />
+      <div className="h-2 bg-card" />
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <Avatar className="h-10 w-10 border-2 border-muted-foreground/10">

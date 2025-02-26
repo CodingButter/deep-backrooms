@@ -1,59 +1,59 @@
 // components/agents/AgentList.tsx
-'use client';
+"use client"
 
-import Link from 'next/link';
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import Image from 'next/image';
+import Link from "next/link"
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import Image from "next/image"
 
 type Agent = {
-  id: string;
-  name: string;
-  providerId: string;
-  model: string;
-  systemPrompt: string;
-  avatar?: string | null;
-  userId: string;
-  createdAt: number;
-  updatedAt: number;
+  id: string
+  name: string
+  providerId: string
+  model: string
+  systemPrompt: string
+  avatar?: string | null
+  userId: string
+  createdAt: number
+  updatedAt: number
   provider?: {
-    name: string;
-  };
-};
+    name: string
+  }
+}
 
 type AgentListProps = {
-  agents: Agent[];
-  onDeleteAgent?: (id: string) => Promise<void>;
-};
+  agents: Agent[]
+  onDeleteAgent?: (id: string) => Promise<void>
+}
 
 export default function AgentList({ agents, onDeleteAgent }: AgentListProps) {
-  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleDeleteClick = (agentId: string) => {
-    setConfirmDelete(agentId);
-  };
+    setConfirmDelete(agentId)
+  }
 
   const handleCancelDelete = () => {
-    setConfirmDelete(null);
-  };
+    setConfirmDelete(null)
+  }
 
   const handleConfirmDelete = async (agentId: string) => {
-    if (!onDeleteAgent) return;
-    
-    setIsDeleting(true);
-    setError(null);
-    
+    if (!onDeleteAgent) return
+
+    setIsDeleting(true)
+    setError(null)
+
     try {
-      await onDeleteAgent(agentId);
-      setConfirmDelete(null);
+      await onDeleteAgent(agentId)
+      setConfirmDelete(null)
     } catch (err) {
-      setError(err.message || 'Failed to delete agent');
+      setError(err.message || "Failed to delete agent")
     } finally {
-      setIsDeleting(false);
+      setIsDeleting(false)
     }
-  };
+  }
 
   if (agents.length === 0) {
     return (
@@ -63,7 +63,7 @@ export default function AgentList({ agents, onDeleteAgent }: AgentListProps) {
           <Button>Create First Agent</Button>
         </Link>
       </div>
-    );
+    )
   }
 
   return (
@@ -73,19 +73,16 @@ export default function AgentList({ agents, onDeleteAgent }: AgentListProps) {
           {error}
         </div>
       )}
-      
+
       <div className="flex justify-end mb-4">
         <Link href="/agents/new">
           <Button>Create Agent</Button>
         </Link>
       </div>
-      
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {agents.map(agent => (
-          <div 
-            key={agent.id} 
-            className="border rounded-lg overflow-hidden shadow-sm"
-          >
+        {agents.map((agent) => (
+          <div key={agent.id} className="border rounded-lg overflow-hidden shadow-sm">
             <div className="h-24 bg-gradient-to-r from-blue-400 to-indigo-500 relative">
               {agent.avatar ? (
                 <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2">
@@ -105,22 +102,20 @@ export default function AgentList({ agents, onDeleteAgent }: AgentListProps) {
                 </div>
               )}
             </div>
-            
+
             <div className="pt-12 p-4">
               <h3 className="font-semibold text-lg text-center">{agent.name}</h3>
-              
+
               <div className="mt-2 text-sm text-gray-500 text-center">
                 <p>Model: {agent.model}</p>
                 {agent.provider && <p>Provider: {agent.provider.name}</p>}
               </div>
-              
+
               <div className="mt-4 border-t pt-3">
                 <p className="text-sm font-medium mb-1">System Prompt:</p>
-                <p className="text-sm text-gray-600 line-clamp-3">
-                  {agent.systemPrompt}
-                </p>
+                <p className="text-sm text-gray-600 line-clamp-3">{agent.systemPrompt}</p>
               </div>
-              
+
               <div className="mt-4 pt-3 border-t flex justify-between">
                 {confirmDelete === agent.id ? (
                   <div className="flex space-x-2 items-center">
@@ -139,7 +134,7 @@ export default function AgentList({ agents, onDeleteAgent }: AgentListProps) {
                       onClick={() => handleConfirmDelete(agent.id)}
                       disabled={isDeleting}
                     >
-                      {isDeleting ? 'Deleting...' : 'Delete'}
+                      {isDeleting ? "Deleting..." : "Delete"}
                     </Button>
                   </div>
                 ) : (
@@ -150,9 +145,7 @@ export default function AgentList({ agents, onDeleteAgent }: AgentListProps) {
                       </Button>
                     </Link>
                     <Link href={`/agents/${agent.id}/chat`}>
-                      <Button size="sm">
-                        Chat
-                      </Button>
+                      <Button size="sm">Chat</Button>
                     </Link>
                     {onDeleteAgent && (
                       <Button
@@ -171,5 +164,5 @@ export default function AgentList({ agents, onDeleteAgent }: AgentListProps) {
         ))}
       </div>
     </div>
-  );
+  )
 }

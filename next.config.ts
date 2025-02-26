@@ -1,5 +1,6 @@
 // next.config.ts
-import { NextConfig } from 'next';
+// next.config.ts
+import { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -10,28 +11,26 @@ const nextConfig: NextConfig = {
   headers: async () => {
     return [
       {
-        source: '/(.*)',
+        source: "/(.*)",
         headers: [
           {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=63072000; includeSubDomains; preload',
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
           },
           {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
+            key: "X-Content-Type-Options",
+            value: "nosniff",
           },
           {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN',
+            key: "X-Frame-Options",
+            value: "SAMEORIGIN",
           },
           {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
+            key: "X-XSS-Protection",
+            value: "1; mode=block",
           },
         ],
       },
-    ];
+    ]
   },
-};
-
-export default nextConfig;
+}

@@ -1,6 +1,6 @@
-import { db } from '../db';
-import { Agent } from './types';
+// lib/agents.ts
+import { db } from "@/db/schema"
 
 export async function getAgents(): Promise<Agent[]> {
-  return await db.Agent.findMany();
+  return await db.agent.findMany()
 }

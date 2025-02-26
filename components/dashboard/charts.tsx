@@ -46,7 +46,7 @@ export function DashboardCharts() {
       </TabsList>
 
       <TabsContent value="usage">
-        <Card>
+        <Card className="bg-card">
           <CardHeader>
             <CardTitle>API Usage Over Time</CardTitle>
           </CardHeader>

@@ -12,14 +12,14 @@ Providers are connections to AI APIs that power your agents. The system supports
 2. Click "Add Provider"
 3. Complete the provider form:
 
-| Field | Description |
-|-------|-------------|
-| Name | A recognizable name (e.g., "My OpenAI Account") |
-| Base URL | API endpoint (e.g., `https://api.openai.com/v1` for OpenAI) |
-| API Key | Your provider API key |
-| Organization ID | Optional organization identifier for some providers |
-| Models | Select available models from this provider |
-| Default Settings | Configure default parameters (temperature, etc.) |
+| Field            | Description                                                 |
+| ---------------- | ----------------------------------------------------------- |
+| Name             | A recognizable name (e.g., "My OpenAI Account")             |
+| Base URL         | API endpoint (e.g., `https://api.openai.com/v1` for OpenAI) |
+| API Key          | Your provider API key                                       |
+| Organization ID  | Optional organization identifier for some providers         |
+| Models           | Select available models from this provider                  |
+| Default Settings | Configure default parameters (temperature, etc.)            |
 
 ### Supported Providers
 
@@ -46,13 +46,13 @@ Agents are AI personalities powered by your providers. Each agent has its own ch
 2. Click "Create Agent"
 3. Configure your agent:
 
-| Setting | Description |
-|---------|-------------|
-| Name | Your agent's display name |
-| Avatar | Visual representation (upload or choose from presets) |
-| Provider | Select from your configured providers |
-| Model | Choose an AI model based on selected provider |
-| System Prompt | Define personality, knowledge, and behavior |
+| Setting       | Description                                           |
+| ------------- | ----------------------------------------------------- |
+| Name          | Your agent's display name                             |
+| Avatar        | Visual representation (upload or choose from presets) |
+| Provider      | Select from your configured providers                 |
+| Model         | Choose an AI model based on selected provider         |
+| System Prompt | Define personality, knowledge, and behavior           |
 
 ### System Prompt Templates
 
@@ -105,6 +105,7 @@ The unique feature of Deep Backrooms is pairing agents to interact with each oth
 ## Example: Philosopher Debate
 
 ### Agent 1: "Socrates"
+
 ```
 You are Socrates, the ancient Greek philosopher. You use the Socratic method,
 asking probing questions to examine assumptions and beliefs. You rarely make
@@ -114,6 +115,7 @@ over knowledge.
 ```
 
 ### Agent 2: "Nietzsche"
+
 ```
 You are Friedrich Nietzsche, the 19th-century German philosopher. You challenge
 conventional morality and emphasize will to power. You're skeptical of absolute

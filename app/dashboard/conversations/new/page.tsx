@@ -1,22 +1,22 @@
-// app/conversations/new/page.tsx
-import { auth } from "@/auth";
-import { db } from "@/db/schema";
-import { aiAgents } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import ConversationForm from "@/components/conversations/ConversationForm";
+// app/dashboard/conversations/new/page.tsx
+import { auth } from "@/auth"
+import { db } from "@/db/schema"
+import { aiAgents } from "@/db/schema"
+import { eq } from "drizzle-orm"
+import ConversationForm from "@/components/conversations/ConversationForm"
 
 export const metadata = {
-  title: "Create New Conversation"
-};
+  title: "Create New Conversation",
+}
 
 export default async function NewConversationPage() {
-  const session = await auth();
+  const session = await auth()
 
   // Fetch user's agents
   const agents = await db
     .select()
     .from(aiAgents)
-    .where(eq(aiAgents.userId, session?.user?.id || ''));
+    .where(eq(aiAgents.userId, session?.user?.id || ""))
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -34,5 +34,5 @@ export default async function NewConversationPage() {
         </div>
       )}
     </div>
-  );
+  )
 }

@@ -191,21 +191,15 @@
 
   /* Sidebar component styling */
   .sidebar {
-    @apply bg-[hsl(var(--sidebar))] text-[hsl(var(--sidebar-foreground))]
-           border-r border-[hsl(var(--sidebar-border))]
-           shadow-lg transition-all duration-300;
+    @apply bg-[hsl(var(--sidebar))] text-[hsl(var(--sidebar-foreground))] border-r border-[hsl(var(--sidebar-border))] shadow-lg transition-all duration-300;
   }
 
   .sidebar-item {
-    @apply px-4 py-2 hover:bg-[hsl(var(--sidebar-accent))]
-           hover:text-[hsl(var(--sidebar-accent-foreground))]
-           transition-colors duration-200;
+    @apply px-4 py-2 hover:bg-[hsl(var(--sidebar-accent))] hover:text-[hsl(var(--sidebar-accent-foreground))] transition-colors duration-200;
   }
 
   .sidebar-item.active {
-    @apply bg-[hsl(var(--sidebar-primary))]
-           text-[hsl(var(--sidebar-primary-foreground))]
-           ring-2 ring-[hsl(var(--sidebar-ring))];
+    @apply bg-[hsl(var(--sidebar-primary))] text-[hsl(var(--sidebar-primary-foreground))] ring-2 ring-[hsl(var(--sidebar-ring))];
   }
 
   /* Scrollbar styling */
@@ -267,8 +261,10 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
+    outline-color: hsl(var(--ring) / 0.5);
   }
+
   body {
     @apply bg-background text-foreground;
   }

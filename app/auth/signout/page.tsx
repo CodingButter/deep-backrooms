@@ -1,18 +1,18 @@
 // app/auth/signout/page.tsx
-import { redirect } from "next/navigation";
-import { auth, signOut } from "@/auth";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { redirect } from "next/navigation"
+import { auth, signOut } from "@/auth"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 export const metadata = {
-  title: "Sign Out - Deep Backrooms"
-};
+  title: "Sign Out - Deep Backrooms",
+}
 
 export default async function SignOutPage() {
-  const session = await auth();
+  const session = await auth()
 
   if (!session?.user) {
-    redirect("/auth/signin");
+    redirect("/auth/signin")
   }
 
   return (
@@ -23,10 +23,10 @@ export default async function SignOutPage() {
           Are you sure you want to sign out of Deep Backrooms?
         </p>
 
-        <form 
+        <form
           action={async () => {
-            "use server";
-            await signOut({ redirectTo: "/" });
+            "use server"
+            await signOut({ redirectTo: "/" })
           }}
         >
           <Button type="submit" className="w-full">
@@ -35,14 +35,11 @@ export default async function SignOutPage() {
         </form>
 
         <Link href="/dashboard">
-          <Button 
-            variant="outline" 
-            className="w-full"
-          >
+          <Button variant="outline" className="w-full">
             Cancel
           </Button>
         </Link>
       </div>
     </div>
-  );
+  )
 }
