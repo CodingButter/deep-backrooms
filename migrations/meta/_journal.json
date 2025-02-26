@@ -15,6 +15,13 @@
       "when": 1739838305059,
       "tag": "0001_curly_alex_wilder",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1740528924457,
+      "tag": "0002_acoustic_elektra",
+      "breakpoints": true
     }
   ]
 }

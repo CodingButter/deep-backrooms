@@ -2,12 +2,13 @@
 import { redirect } from "next/navigation";
 import { auth, signOut } from "@/auth";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export const metadata = {
   title: "Sign Out - Deep Backrooms"
 };
 
-export default async function LogoutPage() {
+export default async function SignOutPage() {
   const session = await auth();
 
   if (!session?.user) {
@@ -33,13 +34,14 @@ export default async function LogoutPage() {
           </Button>
         </form>
 
-        <Button 
-          variant="outline" 
-          className="w-full"
-          onClick={() => redirect("/dashboard")}
-        >
-          Cancel
-        </Button>
+        <Link href="/dashboard">
+          <Button 
+            variant="outline" 
+            className="w-full"
+          >
+            Cancel
+          </Button>
+        </Link>
       </div>
     </div>
   );

@@ -59,7 +59,7 @@ export default async function RootLayout({
                 <div className="flex items-center gap-2">
                   <ThemeToggle />
                   
-                  {user ? (
+                   {user ? (
                     <div className="flex items-center gap-2">
                       <span className="text-sm hidden md:inline-block">
                         {user.name || user.email}

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Github, Globe, LogIn } from "lucide-react";
 import { cn } from "@/lib/utils"; // Utility for conditional classnames
 
-export default function LoginPage() {
+export default function SignInPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignIn = async (provider: 'github' | 'google') => {
