@@ -5,7 +5,7 @@ import "./globals.css";
 import { auth } from "@/auth";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ThemeProvider } from "@/components/theme/theme-provider";
+import {Providers} from "@/components/providers";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -26,7 +26,7 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider defaultTheme="system" storageKey="deep-backrooms-theme">
+        <Providers>
           <div className="flex flex-col min-h-screen">
             <header className="border-b bg-background">
               <div className="container mx-auto flex items-center justify-between h-16 px-4">
@@ -109,7 +109,7 @@ export default async function RootLayout({
               </div>
             </footer>
           </div>
-        </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );

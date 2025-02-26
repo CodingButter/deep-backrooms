@@ -3,240 +3,264 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Default design tokens defined via @theme.
-   All color tokens now start with --color- so that Tailwind can generate
-   corresponding utilities for them.
-*/
+/* Default design tokens */
 @theme {
   --color-background: 0 0% 100%;
   --color-foreground: 222.2 84% 4.9%;
-  
   --color-card: 0 0% 100%;
   --color-card-foreground: 222.2 84% 4.9%;
-  
   --color-popover: 0 0% 100%;
   --color-popover-foreground: 222.2 84% 4.9%;
-  
   --color-primary: 262.1 83.3% 57.8%;
   --color-primary-foreground: 210 40% 98%;
-  
   --color-secondary: 210 40% 96.1%;
   --color-secondary-foreground: 222.2 47.4% 11.2%;
-  
   --color-muted: 210 40% 96.1%;
   --color-muted-foreground: 215.4 16.3% 46.9%;
-  
   --color-accent: 210 40% 96.1%;
   --color-accent-foreground: 222.2 47.4% 11.2%;
-  
   --color-destructive: 0 84.2% 60.2%;
   --color-destructive-foreground: 210 40% 98%;
-  
   --color-border: 214.3 31.8% 91.4%;
   --input: 214.3 31.8% 91.4%;
   --ring: 222.2 84% 4.9%;
-  
   --radius: 0.5rem;
-  
-  /* Scrollbar Colors */
   --color-scrollbar-track: 210 40% 96.1%;
   --color-scrollbar-thumb: 215.4 16.3% 76.9%;
   --color-scrollbar-thumb-hover: 215.4 16.3% 66.9%;
+  /* Default sidebar - Clean and minimal */
+  --sidebar: hsl(0 0% 98%);
+  --sidebar-foreground: hsl(222.2 47.4% 11.2%);
+  --sidebar-primary: hsl(262.1 83.3% 57.8%);
+  --sidebar-primary-foreground: hsl(210 40% 98%);
+  --sidebar-accent: hsl(210 40% 96.1%);
+  --sidebar-accent-foreground: hsl(222.2 47.4% 11.2%);
+  --sidebar-border: hsl(214.3 31.8% 91.4%);
+  --sidebar-ring: hsl(262.1 83.3% 57.8%);
 }
 
-/* Alternative theme overrides */
+/* Dark theme - Sleek metallic look, now darker */
 .dark {
   --color-background: 222.2 84% 4.9%;
   --color-foreground: 210 40% 98%;
-  
   --color-card: 222.2 84% 4.9%;
   --color-card-foreground: 210 40% 98%;
-  
   --color-popover: 222.2 84% 4.9%;
   --color-popover-foreground: 210 40% 98%;
-  
   --color-primary: 262.1 83.3% 57.8%;
   --color-primary-foreground: 210 40% 98%;
-  
   --color-secondary: 217.2 32.6% 17.5%;
   --color-secondary-foreground: 210 40% 98%;
-  
   --color-muted: 217.2 32.6% 17.5%;
   --color-muted-foreground: 215 20.2% 65.1%;
-  
   --color-accent: 217.2 32.6% 17.5%;
   --color-accent-foreground: 210 40% 98%;
-  
   --color-destructive: 0 62.8% 30.6%;
   --color-destructive-foreground: 210 40% 98%;
-  
   --color-border: 217.2 32.6% 17.5%;
   --input: 217.2 32.6% 17.5%;
   --ring: 212.7 26.8% 83.9%;
-  
-  /* Scrollbar Colors */
   --color-scrollbar-track: 217.2 32.6% 12.5%;
   --color-scrollbar-thumb: 215.4 16.3% 36.9%;
   --color-scrollbar-thumb-hover: 215.4 16.3% 46.9%;
+  --sidebar: hsl(240 10% 5%);
+  --sidebar-foreground: hsl(0 0% 98%);
+  --sidebar-primary: hsl(262.1 83.3% 57.8%);
+  --sidebar-primary-foreground: hsl(210 40% 98%);
+  --sidebar-accent: hsl(240 3.7% 10%);
+  --sidebar-accent-foreground: hsl(210 40% 98%);
+  --sidebar-border: hsl(217.2 32.6% 25%);
+  --sidebar-ring: hsl(212.7 26.8% 83.9%);
 }
 
+/* Backrooms theme - Retro institutional feel */
 .backrooms {
   --color-background: 45 30% 94%;
   --color-foreground: 20 14.3% 4.1%;
-  
   --color-card: 60 15% 94%;
   --color-card-foreground: 20 14.3% 4.1%;
-  
   --color-popover: 45 30% 94%;
   --color-popover-foreground: 20 14.3% 4.1%;
-  
   --color-primary: 40 63.6% 50.8%;
   --color-primary-foreground: 26 83.3% 14.1%;
-  
   --color-secondary: 60 4.8% 95.9%;
   --color-secondary-foreground: 24 9.8% 10%;
-  
   --color-muted: 60 4.8% 95.9%;
   --color-muted-foreground: 25 5.3% 44.7%;
-  
   --color-accent: 60 4.8% 95.9%;
   --color-accent-foreground: 24 9.8% 10%;
-  
   --color-destructive: 0 84.2% 60.2%;
   --color-destructive-foreground: 60 9.1% 97.8%;
-  
   --color-border: 20 5.9% 90%;
   --input: 20 5.9% 90%;
   --ring: 35 91% 32.9%;
-  
   --radius: 0.125rem;
-  
-  /* Scrollbar Colors */
   --color-scrollbar-track: 45 20% 88%;
   --color-scrollbar-thumb: 40 53.6% 45.8%;
   --color-scrollbar-thumb-hover: 40 53.6% 40.8%;
+  --sidebar: hsl(60 20% 92%);
+  --sidebar-foreground: hsl(20 14.3% 4.1%);
+  --sidebar-primary: hsl(40 63.6% 50.8%);
+  --sidebar-primary-foreground: hsl(26 83.3% 14.1%);
+  --sidebar-accent: hsl(60 15% 88%);
+  --sidebar-accent-foreground: hsl(24 9.8% 10%);
+  --sidebar-border: hsl(45 30% 80%);
+  --sidebar-ring: hsl(40 63.6% 50.8%);
 }
 
+/* Neon theme - Vibrant glowing sidebar */
 .neon {
   --color-background: 240 10% 3.9%;
   --color-foreground: 0 0% 98%;
-  
   --color-card: 240 10% 3.9%;
   --color-card-foreground: 0 0% 98%;
-  
   --color-popover: 240 10% 3.9%;
   --color-popover-foreground: 0 0% 98%;
-  
   --color-primary: 326 100% 60%;
   --color-primary-foreground: 0 0% 98%;
-  
   --color-secondary: 196 100% 50%;
   --color-secondary-foreground: 0 0% 98%;
-  
   --color-muted: 240 3.7% 15.9%;
   --color-muted-foreground: 240 5% 64.9%;
-  
   --color-accent: 142 71% 45%;
   --color-accent-foreground: 0 0% 98%;
-  
   --color-destructive: 0 62.8% 30.6%;
   --color-destructive-foreground: 0 0% 98%;
-  
   --color-border: 240 3.7% 15.9%;
   --input: 240 3.7% 15.9%;
   --ring: 326 100% 60%;
-  
   --radius: 0;
-  
-  /* Scrollbar Colors */
   --color-scrollbar-track: 240 10% 8.9%;
   --color-scrollbar-thumb: 326 100% 50%;
   --color-scrollbar-thumb-hover: 326 100% 60%;
+  --sidebar: hsl(240 10% 6%);
+  --sidebar-foreground: hsl(0 0% 98%);
+  --sidebar-primary: hsl(326 100% 60%);
+  --sidebar-primary-foreground: hsl(0 0% 98%);
+  --sidebar-accent: hsl(196 100% 50%);
+  --sidebar-accent-foreground: hsl(0 0% 98%);
+  --sidebar-border: hsl(326 100% 60%);
+  --sidebar-ring: hsl(326 100% 70%);
 }
 
-/* New Electric Theme inspired by Dreams of an Electric Mind */
+/* Electric theme - High-tech energetic style */
 .electric {
-  --color-background: 230 15% 4%;      /* Ultra-dark blue-black */
-  --color-foreground: 210 100% 95%;      /* Off-white for high contrast */
-  
-  --color-card: 230 15% 8%;              /* Slightly lighter background for cards */
+  --color-background: 230 15% 4%;
+  --color-foreground: 210 100% 95%;
+  --color-card: 230 15% 8%;
   --color-card-foreground: 210 100% 95%;
-  
   --color-popover: 230 15% 8%;
   --color-popover-foreground: 210 100% 95%;
-  
-  --color-primary: 210 100% 50%;         /* Electric blue */
+  --color-primary: 210 100% 50%;
   --color-primary-foreground: 210 100% 95%;
-  
-  --color-secondary: 270 100% 50%;         /* Vibrant purple */
+  --color-secondary: 270 100% 50%;
   --color-secondary-foreground: 210 100% 95%;
-  
-  --color-muted: 210 10% 20%;            /* Dark gray */
+  --color-muted: 210 10% 20%;
   --color-muted-foreground: 210 100% 95%;
-  
-  --color-accent: 330 100% 55%;          /* Neon pink */
+  --color-accent: 330 100% 55%;
   --color-accent-foreground: 210 100% 95%;
-  
-  --color-destructive: 0 100% 50%;        /* Vivid red */
+  --color-destructive: 0 100% 50%;
   --color-destructive-foreground: 210 100% 95%;
-  
-  --color-border: 210 10% 10%;           /* Subtle dark border */
+  --color-border: 210 10% 10%;
   --input: 210 10% 10%;
-  --ring: 210 100% 50%;                 /* Electric blue ring */
-  
+  --ring: 210 100% 50%;
   --radius: 0.5rem;
-  
-  /* Electric theme Scrollbar Colors */
-  --color-scrollbar-track: 230 15% 6%;      /* Darker than background */
-  --color-scrollbar-thumb: 210 100% 50%;      /* Matching primary */
+  --color-scrollbar-track: 230 15% 6%;
+  --color-scrollbar-thumb: 210 100% 50%;
   --color-scrollbar-thumb-hover: 210 100% 60%;
+  --sidebar: hsl(230 15% 6%);
+  --sidebar-foreground: hsl(210 100% 95%);
+  --sidebar-primary: hsl(210 100% 50%);
+  --sidebar-primary-foreground: hsl(210 100% 95%);
+  --sidebar-accent: hsl(270 100% 50%);
+  --sidebar-accent-foreground: hsl(210 100% 95%);
+  --sidebar-border: hsl(210 100% 50%);
+  --sidebar-ring: hsl(210 100% 60%);
 }
 
-/* Base styles using the generated tokens via arbitrary value utilities */
+/* Base styles */
 @layer base {
-  * {
-    @apply border-[hsl(var(--color-border))];
+  /* Focus ring styling */
+  *:focus {
+    @apply ring-1 ring-[hsl(var(--ring))/0.5];
   }
+
   body {
     @apply bg-[hsl(var(--color-background))] text-[hsl(var(--color-foreground))];
   }
-  
-  /* Custom Scrollbar Styling */
+
+  /* Sidebar component styling */
+  .sidebar {
+    @apply bg-[hsl(var(--sidebar))] text-[hsl(var(--sidebar-foreground))]
+           border-r border-[hsl(var(--sidebar-border))]
+           shadow-lg transition-all duration-300;
+  }
+
+  .sidebar-item {
+    @apply px-4 py-2 hover:bg-[hsl(var(--sidebar-accent))]
+           hover:text-[hsl(var(--sidebar-accent-foreground))]
+           transition-colors duration-200;
+  }
+
+  .sidebar-item.active {
+    @apply bg-[hsl(var(--sidebar-primary))]
+           text-[hsl(var(--sidebar-primary-foreground))]
+           ring-2 ring-[hsl(var(--sidebar-ring))];
+  }
+
+  /* Scrollbar styling */
   ::-webkit-scrollbar {
     width: 14px;
   }
-  
+
   ::-webkit-scrollbar-track {
     background: hsl(var(--color-scrollbar-track));
   }
-  
+
   ::-webkit-scrollbar-thumb {
     background: hsl(var(--color-scrollbar-thumb));
     border-radius: 6px;
     border: 3px solid hsl(var(--color-scrollbar-track));
   }
-  
+
   ::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--color-scrollbar-thumb-hover));
   }
-  
-  /* Firefox scrollbar styling */
+
   * {
     scrollbar-color: hsl(var(--color-scrollbar-thumb)) hsl(var(--color-scrollbar-track));
     scrollbar-width: thin;
   }
-  
-  /* Add a subtle glow to scrollbar in neon theme */
-  .neon::-webkit-scrollbar-thumb {
-    box-shadow: 0 0 8px hsl(var(--color-primary));
+
+  /* Theme-specific styling for Sidebar */
+  .neon .sidebar {
+    box-shadow: 0 0 15px hsl(var(--sidebar-primary));
   }
-  
-  /* Thin scrollbar for conversation container */
-  .conversation-container::-webkit-scrollbar {
-    width: 8px;
+
+  .electric .sidebar {
+    background: linear-gradient(45deg, hsl(var(--sidebar)), hsl(var(--sidebar-primary)) 100%);
   }
-  
-  .conversation-container::-webkit-scrollbar-thumb {
-    border: 2px solid hsl(var(--color-scrollbar-track));
+
+  .backrooms .sidebar {
+    border-style: solid;
+    border-width: 2px;
+    box-shadow: inset 0 0 10px hsl(var(--sidebar-border));
   }
+
+  .dark .sidebar {
+    background: linear-gradient(45deg, hsl(var(--sidebar)), hsl(var(--sidebar-primary)) 10%);
+    box-shadow: 0 0 10px hsl(var(--sidebar-primary));
+  }
+}
+
+/* Inline theme for sidebar */
+@theme inline {
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 }
