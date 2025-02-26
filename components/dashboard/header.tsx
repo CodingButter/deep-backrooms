@@ -1,7 +1,6 @@
-// components/dashboard/header.tsx
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import { Bell, Search, ChevronDown, Plus, Settings, HelpCircle, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -17,7 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Link from "next/link"
-import { signOut } from "@/auth"
+import { handleSignOut } from "@/app/actions"
 
 type User = {
   id: string
@@ -32,6 +31,7 @@ type DashboardHeaderProps = {
 
 export function DashboardHeader({ user }: DashboardHeaderProps) {
   const [showSearch, setShowSearch] = useState(false)
+  const [isPending, startTransition] = useTransition()
 
   return (
     <header className="h-16 px-4 border-b bg-background/80 backdrop-blur-sm flex items-center justify-between sticky top-0 z-10">
@@ -163,16 +163,18 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
+            <DropdownMenuItem>
               <form
-                action={async () => {
-                  "use server"
-                  await signOut({ redirectTo: "/" })
+                action={handleSignOut}
+                onSubmit={(e) => {
+                  startTransition(() => {
+                    // Optional: Add any client-side transition logic if needed
+                  })
                 }}
               >
-                <button className="flex w-full items-center">
+                <button type="submit" className="flex w-full items-center" disabled={isPending}>
                   <LogOut className="mr-2 h-4 w-4" />
-                  Sign Out
+                  {isPending ? "Signing out..." : "Sign Out"}
                 </button>
               </form>
             </DropdownMenuItem>
