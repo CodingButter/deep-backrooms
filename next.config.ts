@@ -5,7 +5,6 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   experimental: {
     // These settings optimize for Edge runtime
-    serverComponentsExternalPackages: [],
   },
   // Configure headers to work properly with edge runtime
   headers: async () => {

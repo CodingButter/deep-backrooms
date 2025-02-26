@@ -1,5 +1,5 @@
 // db/schema.ts
-import { integer, sqliteTable, text, primaryKey } from "drizzle-orm/sqlite-core"
+import { integer, sqliteTable, text, primaryKey, uniqueIndex } from "drizzle-orm/sqlite-core"
 import { createClient } from "@libsql/client"
 import { drizzle } from "drizzle-orm/libsql"
 
@@ -43,7 +43,6 @@ export const accounts = sqliteTable('account', {
   }),
 }));
 
-// Session table schema
 export const sessions = sqliteTable('session', {
   sessionToken: text('sessionToken').primaryKey().notNull(),
   userId: text('userId')
@@ -57,13 +56,9 @@ export const verificationTokens = sqliteTable('verificationToken', {
   identifier: text('identifier').notNull(),
   token: text('token').notNull(),
   expires: integer('expires', { mode: 'timestamp_ms' }).notNull(),
-},
-(vt) => ({
-  compoundKey: primaryKey({
-    columns: [vt.identifier, vt.token],
-  }),
-}));
-
+}, (table) => [
+  primaryKey({ columns: [table.identifier, table.token] })
+]);
 // The rest of your schema (providers, agents, etc.)
 // ...
 
@@ -128,3 +123,20 @@ export const providers = sqliteTable("provider", {
     .$defaultFn(() => new Date()),
 })
 
+export const authenticators = sqliteTable('authenticator', {
+  credentialID: text('credentialID').notNull(),
+  userId: text('userId')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  providerAccountId: text('providerAccountId').notNull(),
+  credentialPublicKey: text('credentialPublicKey').notNull(),
+  counter: integer('counter').notNull(),
+  credentialDeviceType: text('credentialDeviceType').notNull(),
+  credentialBackedUp: integer('credentialBackedUp', { mode: 'boolean' }).notNull(),
+  transports: text('transports'),
+}, (table) => ({
+  primaryKey: primaryKey({
+    columns: [table.userId, table.credentialID],
+  }),
+  uniqueCredentialID: uniqueIndex('authenticator_credentialID_unique').on(table.credentialID),
+}))

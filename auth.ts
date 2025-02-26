@@ -1,11 +1,10 @@
-// auth.ts
 import NextAuth from 'next-auth';
 import { DrizzleAdapter } from '@auth/drizzle-adapter';
 import { db } from '@/db/schema';
 import GoogleProvider from 'next-auth/providers/google';
 import GitHubProvider from 'next-auth/providers/github';
+import { DefaultSession } from 'next-auth';
 
-// Extend the session type to include user ID
 declare module 'next-auth' {
   interface Session {
     user: {
@@ -14,8 +13,6 @@ declare module 'next-auth' {
   }
 }
 
-// For NextAuth configuration
-// https://next-auth.js.org/configuration/options
 export const {
   handlers: { GET, POST },
   auth,
@@ -34,10 +31,8 @@ export const {
     }),
   ],
   callbacks: {
-    session({ session, token }) {
-      if (session?.user && token.sub) {
-        session.user.id = token.sub;
-      }
+    async session({ session, user }) {
+      session.user.id = user.id;
       return session;
     },
   },
@@ -47,6 +42,6 @@ export const {
     signOut: '/auth/signout',
   },
   session: {
-    strategy: 'jwt',
+    strategy: 'database',
   },
 });
