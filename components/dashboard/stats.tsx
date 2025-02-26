@@ -21,7 +21,7 @@ export function DashboardStats({
   apiUsage = 65, // Default value for demo
 }: StatsProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 shrink-0">
       <StatsCard
         title="Agents"
         value={totalAgents}
@@ -93,7 +93,7 @@ function StatsCard({
       variants={cardVariants}
       transition={{ duration: 0.4 }}
     >
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden min-h-full">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>

@@ -1,31 +1,7 @@
-import { DashboardSidebar } from "@/components/dashboard/sidebar"
-import { DashboardHeader } from "@/components/dashboard/header"
-import { auth } from "@/auth"
-import { redirect } from "next/navigation"
-import { SidebarProvider } from "@/components/ui/sidebar"
-
-export default async function DashboardLayout({
+export default function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const session = await auth()
-
-  if (!session?.user) {
-    redirect("/auth/signin")
-  }
-
-  return (
-    <SidebarProvider>
-      <div className="flex overflow-hidden">
-        <DashboardSidebar />
-        <div className="flex flex-col flex-1 overflow-hidden">
-          <DashboardHeader user={session.user} />
-          <main className="flex-1 overflow-auto p-6 bg-background/50 backdrop-blur-sm">
-            {children}
-          </main>
-        </div>
-      </div>
-    </SidebarProvider>
-  )
+  return <div className="flex flex-col p-12 space-y-4">{children}</div>
 }
