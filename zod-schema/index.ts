@@ -82,6 +82,12 @@ export const insertConversationSchema = createInsertSchema(conversations, {
         });
         return z.NEVER;
       }
+      
+      // Optional: Validate message structure if needed
+      parsed.forEach(message => {
+        messageSchema.parse(message);
+      });
+      
       return parsed;
     } catch (e) {
       ctx.addIssue({
@@ -103,15 +109,14 @@ export const insertConversationSchema = createInsertSchema(conversations, {
       }
       
       // Validate that each ID is a valid UUID
-      for (const id of parsed) {
+      parsed.forEach(id => {
         if (typeof id !== 'string' || !z.string().uuid().safeParse(id).success) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: "Each agent ID must be a valid UUID",
           });
-          return z.NEVER;
         }
-      }
+      });
       
       return parsed;
     } catch (e) {
@@ -123,7 +128,9 @@ export const insertConversationSchema = createInsertSchema(conversations, {
     }
   }),
   coverImage: z.string().url("Cover image must be a valid URL").nullable().optional(),
+  updatedAt: z.number().optional().default(() => new Date().getTime()),
 })
+
 export const selectConversationSchema = createSelectSchema(conversations)
 
 // For "conversationAgents" table

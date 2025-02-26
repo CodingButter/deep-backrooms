@@ -4,25 +4,37 @@ import { providers } from '@/db/schema';
 import { Suspense } from 'react';
 import ProviderList from '@/components/providers/ProviderList';
 import { auth } from '@/auth';
-import { redirect } from 'next/navigation';
+import { eq } from 'drizzle-orm';
 
 async function getProviders() {
   const session = await auth();
   
-  if (!session?.user?.id) {
-    return [];
-  }
-  
   try {
     // Fetch all providers
-    const allProviders = await db.select().from(providers);
+    const allProviders = await db
+      .select({
+        id: providers.id,
+        name: providers.name,
+        baseUrl: providers.baseUrl,
+        apiKey: providers.apiKey,
+        organizationId: providers.organizationId,
+        models: providers.models,
+        defaults: providers.defaults,
+        rateLimits: providers.rateLimits,
+        active: providers.active,
+        createdAt: providers.createdAt,
+        updatedAt: providers.updatedAt
+      })
+      .from(providers);
     
-    // Parse the JSON fields
+    // Parse the JSON fields and convert timestamps
     return allProviders.map(provider => ({
       ...provider,
       models: JSON.parse(provider.models || '[]'),
       defaults: provider.defaults ? JSON.parse(provider.defaults) : null,
       rateLimits: provider.rateLimits ? JSON.parse(provider.rateLimits) : null,
+      createdAt: provider.createdAt ? Number(provider.createdAt) : undefined,
+      updatedAt: provider.updatedAt ? Number(provider.updatedAt) : undefined,
     }));
   } catch (error) {
     console.error('Failed to fetch providers:', error);
@@ -30,20 +42,15 @@ async function getProviders() {
   }
 }
 
-async function deleteProvider(providerId: string) {
+async function deleteProvider(id: string) {
   'use server';
   
   const session = await auth();
   
-  if (!session?.user?.id) {
-    throw new Error('Unauthorized');
-  }
-  
   try {
     // Delete the provider
-    await db.delete(providers).where({ id: providerId });
-    
-    return { success: true };
+    await db.delete(providers)
+      .where(eq(providers.id, id));
   } catch (error) {
     console.error('Failed to delete provider:', error);
     throw new Error('Failed to delete provider');
@@ -51,13 +58,6 @@ async function deleteProvider(providerId: string) {
 }
 
 export default async function ProvidersPage() {
-  const session = await auth();
-  
-  // Redirect if not authenticated
-  if (!session?.user) {
-    redirect('/api/auth/signin');
-  }
-  
   const providersList = await getProviders();
   
   return (

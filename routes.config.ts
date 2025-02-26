@@ -1,16 +1,16 @@
-{
-  "publicRoutes": [
+export default {
+  publicRoutes: [
     "/",
     "/auth/signin",
     "/auth/error",
     "/auth/signout"
   ],
-  "authRoutes": [
+  authRoutes: [
     "/auth/signin",
     "/auth/signout",
     "/auth/error"
   ],
-  "apiPublicRoutes": [
+  apiPublicRoutes: [
     "/api/auth"
   ]
 }

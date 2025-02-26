@@ -3,7 +3,6 @@ import { auth } from "@/auth";
 import { db } from "@/db/schema";
 import { aiAgents, conversations, providers } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -15,21 +14,17 @@ export const metadata = {
 export default async function DashboardPage() {
   const session = await auth();
 
-  if (!session?.user?.id) {
-    redirect("/api/auth/signin");
-  }
-
   // Fetch user's agents
   const agents = await db
     .select()
     .from(aiAgents)
-    .where(eq(aiAgents.userId, session.user.id));
+    .where(eq(aiAgents.userId, session?.user?.id || ''));
 
   // Fetch recent conversations
   const recentConversations = await db
     .select()
     .from(conversations)
-    .where(eq(conversations.userId, session.user.id))
+    .where(eq(conversations.userId, session?.user?.id || ''))
     .orderBy(conversations.updatedAt)
     .limit(5);
 
@@ -42,7 +37,7 @@ export default async function DashboardPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">
-          Welcome, {session.user.name || 'User'}
+          Welcome, {session?.user?.name || 'User'}
         </h1>
         <p className="text-muted-foreground">
           Explore your AI agents and conversations in the Deep Backrooms

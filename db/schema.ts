@@ -88,8 +88,9 @@ export const conversations = sqliteTable("conversation", {
   name: text("name").notNull(),
   coverImage: text("coverImage"),
   messages: text("messages").notNull(), // JSON array of messages
-  // Add a JSON array of agent IDs for easy selection
   agentIds: text("agentIds").notNull(), // JSON array of agent IDs
+  updatedAt: integer("updatedAt", { mode: "timestamp_ms" })
+    .$defaultFn(() => new Date()),
 })
 
 export const conversationAgents = sqliteTable(
