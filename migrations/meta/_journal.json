@@ -29,6 +29,20 @@
       "when": 1740535218998,
       "tag": "0003_tiny_wolfpack",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1740626564635,
+      "tag": "0004_cold_micromax",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1740627849236,
+      "tag": "0005_friendly_human_robot",
+      "breakpoints": true
     }
   ]
 }

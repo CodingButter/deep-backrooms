@@ -1,19 +1,36 @@
 // zod-schema/index.ts
-// ...existing code...
-
 import {
   accounts,
   sessions,
   verificationTokens,
   authenticators,
-  aiAgents,
   conversations,
   conversationAgents,
   users,
   providers,
+  aiProviders,
+  providerModels,
+  agents,
 } from "@/db/schema"
 import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import * as z from "zod"
+
+// Helper function to handle JSON strings or objects
+const jsonSchema = <T extends z.ZodTypeAny>(schema: T) =>
+  z.union([
+    schema,
+    z.string().transform((str, ctx) => {
+      try {
+        return JSON.parse(str)
+      } catch (e) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Invalid JSON string",
+        })
+        return z.NEVER
+      }
+    }),
+  ])
 
 // For "users" table
 export const insertUserSchema = createInsertSchema(users, {
@@ -50,6 +67,7 @@ export const insertSessionSchema = createInsertSchema(sessions, {
   expires: z.date().min(new Date(), "Expiration date must be in the future"),
 })
 export const selectSessionSchema = createSelectSchema(sessions)
+
 // For "verificationTokens" table
 export const insertVerificationTokenSchema = createInsertSchema(verificationTokens, {
   identifier: z.string().min(1, "Identifier is required").email("Identifier must be a valid email"),
@@ -70,23 +88,6 @@ export const insertAuthenticatorSchema = createInsertSchema(authenticators, {
   transports: z.string().nullable().optional(),
 })
 export const selectAuthenticatorSchema = createSelectSchema(authenticators)
-
-// For "aiAgents" table
-export const insertAiAgentSchema = createInsertSchema(aiAgents, {
-  name: z.string().min(1, "Name is required").max(100, "Name must be less than 100 characters"),
-  providerId: z.string().uuid("Invalid provider ID format"),
-  model: z
-    .string()
-    .min(1, "Model is required")
-    .max(50, "Model name must be less than 50 characters"),
-  systemPrompt: z
-    .string()
-    .min(1, "System prompt is required")
-    .max(4000, "System prompt must be less than 4000 characters"),
-  avatar: z.string().url("Avatar must be a valid URL").nullable().optional(),
-  userId: z.string().uuid("Invalid user ID format"),
-})
-export const selectAiAgentSchema = createSelectSchema(aiAgents)
 
 // For "conversations" table
 export const insertConversationSchema = createInsertSchema(conversations, {
@@ -153,7 +154,6 @@ export const insertConversationSchema = createInsertSchema(conversations, {
     .optional()
     .default(() => new Date().getTime()),
 })
-
 export const selectConversationSchema = createSelectSchema(conversations)
 
 // For "conversationAgents" table
@@ -323,7 +323,85 @@ export const updateProviderSchema = insertProviderSchema.partial().extend({
 
 export const selectProviderSchema = createSelectSchema(providers)
 
-// Helper schema for validating API responses
+// AI Providers schemas
+export const insertAiProviderSchema = createInsertSchema(aiProviders, {
+  name: z.string().min(1, "Provider name is required"),
+  baseUrl: z.string().url("Base URL must be a valid URL"),
+  apiKey: z.string().min(1, "API key is required"),
+  isPrivate: z.boolean().default(false),
+  userId: z.string().uuid().nullable().optional(),
+  rateLimitPerMinute: z.number().int().positive().default(60),
+  usageQuota: z.number().int().positive().nullable().optional(),
+  status: z.enum(["active", "disabled", "degraded"]).default("active"),
+  authType: z.enum(["api_key", "oauth", "custom"]).default("api_key"),
+  providerType: z.enum(["llm", "image", "embedding", "multi"]).default("llm"),
+  configSchema: jsonSchema(z.record(z.any())).default({}),
+})
+export const selectAiProviderSchema = createSelectSchema(aiProviders)
+export const updateAiProviderSchema = insertAiProviderSchema.partial()
+
+// Provider Models schemas
+export const insertProviderModelSchema = createInsertSchema(providerModels, {
+  providerId: z.string().uuid("Provider ID must be a valid UUID"),
+  model: z.string().min(1, "Model name is required"),
+  displayName: z.string().optional(),
+  temperature: z.number().min(0).max(2).default(0.7),
+  maxTokens: z.number().int().positive().default(4096),
+  topP: z.number().min(0).max(1).default(1.0),
+  contextWindow: z.number().int().positive().default(8192),
+  rateLimit: z.number().int().positive().default(60),
+  isExperimental: z.boolean().default(false),
+  isDefault: z.boolean().default(false),
+  capabilities: jsonSchema(z.array(z.string())).default(["chat"]),
+  costPerToken: z.number().min(0).default(0),
+  tokenizer: z.string().default("gpt-3.5-turbo"),
+})
+export const selectProviderModelSchema = createSelectSchema(providerModels)
+export const updateProviderModelSchema = insertProviderModelSchema.partial()
+
+// Agent schemas - merged from ai_agent
+export const insertAgentSchema = createInsertSchema(agents, {
+  name: z.string().min(1, "Name is required").max(100, "Name must be less than 100 characters"),
+  description: z.string().max(500, "Description must be less than 500 characters").optional(),
+  avatar: z.string().url("Avatar must be a valid URL").nullable().optional(),
+  providerId: z.string().uuid("Invalid provider ID format"),
+  modelId: z.string().uuid("Invalid model ID format"),
+  temperature: z.number().min(0).max(2).default(0.7),
+  maxTokens: z.number().int().positive().default(4096),
+  topP: z.number().min(0).max(1).default(1.0),
+  frequencyPenalty: z.number().min(-2).max(2).default(0.0),
+  systemPrompt: z.string().min(1, "System prompt is required").default("You are an AI assistant."),
+  persona: jsonSchema(z.record(z.any())).default({}),
+  toolAccess: jsonSchema(z.array(z.string())).default([]),
+  memoryEnabled: z.boolean().default(false),
+  sessionLimit: z.number().int().positive().default(5),
+  userId: z.string().uuid("Invalid user ID format"),
+  customModelParams: jsonSchema(z.record(z.any())).default({}),
+  visibilityScope: z.enum(["private", "team", "public"]).default("private"),
+  version: z.string().default("1.0"),
+  categoryTags: jsonSchema(z.array(z.string())).default([]),
+})
+export const selectAgentSchema = createSelectSchema(agents)
+export const updateAgentSchema = insertAgentSchema.partial()
+
+// Schema for validating message format
+export const messageSchema = z.object({
+  id: z.string().uuid("Invalid message ID format").optional(),
+  role: z.enum(["user", "assistant", "system"], {
+    errorMap: () => ({ message: "Role must be one of: user, assistant, system" }),
+  }),
+  content: z.string().min(1, "Message content is required"),
+  createdAt: z
+    .number()
+    .optional()
+    .default(() => new Date().getTime()),
+  agentId: z.string().uuid("Invalid agent ID format").optional(),
+})
+
+// Schema for validating an array of messages
+export const messagesArraySchema = z.array(messageSchema)
+
+// Response Schemas
 export const apiResponseSchema = z
   .object({
     success: z.boolean(),
@@ -343,23 +421,20 @@ export const apiResponseSchema = z
     }
   )
 
-// Schema for provider authentication test
-export const providerTestSchema = z.object({
-  providerId: z.string().uuid("Invalid provider ID format"),
+// Utility Schema for Provider Model Testing
+export const testProviderConnectionSchema = z.object({
+  providerId: z.string().uuid("Provider ID must be a valid UUID"),
 })
 
-// Schema for validating message format
-export const messageSchema = z.object({
-  id: z.string().uuid("Invalid message ID format").optional(),
-  role: z.enum(["user", "assistant", "system"], {
-    errorMap: () => ({ message: "Role must be one of: user, assistant, system" }),
-  }),
-  content: z.string().min(1, "Message content is required"),
-  createdAt: z
-    .number()
-    .optional()
-    .default(() => new Date().getTime()),
-})
-
-// Schema for validating an array of messages
-export const messagesArraySchema = z.array(messageSchema)
+// Schema for Provider Model Capabilities
+export const modelCapabilitiesSchema = z.enum([
+  "chat",
+  "completion",
+  "embedding",
+  "image-generation",
+  "fine-tuning",
+  "function-calling",
+  "vision",
+  "audio-transcription",
+  "audio-generation",
+])
