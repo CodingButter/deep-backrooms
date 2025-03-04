@@ -1,8 +1,19 @@
 // next.config.ts
 // next.config.ts
 import { NextConfig } from "next"
+// next.config.ts
+import { loadEnvConfig } from "@next/env"
+
+const projectDir = process.cwd()
+loadEnvConfig(projectDir)
+
+console.log({ projectDir, env: process.env })
 
 const nextConfig: NextConfig = {
+  env: {
+    DATABASE_URL: process.env.DATABASE_URL,
+    TURSO_AUTH_TOKEN: process.env.TURSO_AUTH_TOKEN,
+  },
   reactStrictMode: true,
   experimental: {
     // These settings optimize for Edge runtime

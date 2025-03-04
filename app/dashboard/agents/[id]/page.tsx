@@ -1,8 +1,8 @@
 // app/dashboard/agents/[id]/page.tsx
 import { notFound } from "next/navigation"
 import { auth } from "@/auth"
-import { db } from "@/db/schema"
-import { conversations, conversationAgents, aiAgents } from "@/db/schema"
+import { db } from "@/db/schema/agentconversation"
+import { conversations, conversationAgents, aiAgents } from "@/db/schema/agentconversation"
 import { eq, and } from "drizzle-orm"
 import ConversationInterface from "@/components/conversations/ConversationInterface"
 

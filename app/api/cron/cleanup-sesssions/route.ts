@@ -1,7 +1,7 @@
 // app/api/cron/cleanup-sesssions/route.ts
 import { NextResponse } from "next/server"
-import { db } from "@/db/schema"
-import { sessions } from "@/db/schema"
+import { db } from "@/db/schema/agentconversation"
+import { sessions } from "@/db/schema/agentconversation"
 import { lt } from "drizzle-orm"
 
 // This route will run as a cron job to clean up expired sessions

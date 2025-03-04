@@ -1,7 +1,7 @@
 // app/api/conversations/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server"
-import { db } from "@/db/schema"
-import { conversations, conversationAgents, aiAgents } from "@/db/schema"
+import { db } from "@/db/schema/agentconversation"
+import { conversations, conversationAgents, aiAgents } from "@/db/schema/agentconversation"
 import { insertConversationSchema, messageSchema } from "@/zod-schema"
 import { auth } from "@/auth"
 import { eq, and, inArray } from "drizzle-orm"

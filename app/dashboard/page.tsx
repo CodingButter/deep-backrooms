@@ -1,7 +1,7 @@
 // app/dashboard/page.tsx
 import { auth } from "@/auth"
-import { db } from "@/db/schema"
-import { aiAgents, conversations, providers } from "@/db/schema"
+import { db } from "@/db"
+import { agents as aiAgents, conversations, providers } from "@/db/schema/agentconversation"
 import { eq } from "drizzle-orm"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -43,22 +43,30 @@ export default async function DashboardPage() {
 
   // Process conversations for display
   const processedConversations = recentConversations.map((conversation) => {
-    const agentIds = JSON.parse(conversation.agentIds || "[]")
-    const messageArray = JSON.parse(conversation.messages || "[]")
+    // Parse messages to get message count
+    const messages = conversation.messages ? JSON.parse(conversation.messages) : []
+    const messageCount = messages.length
+
+    // Get agent IDs for this conversation
+    const agentIds = conversation.agentIds ? JSON.parse(conversation.agentIds) : []
+
+    // Filter agents for this conversation
+    const conversationAgents = agents.filter((agent) => agentIds.includes(agent.id))
 
     return {
       id: conversation.id,
       name: conversation.name,
       coverImage: conversation.coverImage,
-      updatedAt: conversation.updatedAt,
-      messageCount: messageArray.length,
-      agents: agents
-        .filter((agent) => agentIds.includes(agent.id))
-        .map((agent) => ({
-          id: agent.id,
-          name: agent.name,
-          avatar: agent.avatar,
-        })),
+      updatedAt:
+        conversation.updatedAt instanceof Date
+          ? conversation.updatedAt.getTime()
+          : conversation.updatedAt,
+      messageCount: messageCount,
+      agents: conversationAgents.map((agent) => ({
+        id: agent.id,
+        name: agent.name,
+        avatar: agent.avatar,
+      })),
     }
   })
 

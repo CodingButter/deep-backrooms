@@ -1,8 +1,8 @@
 // app/api/providers/test/route.ts
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import { db } from "@/db/schema"
-import { providers } from "@/db/schema"
+import { db } from "@/db/schema/agentconversation"
+import { providers } from "@/db/schema/agentconversation"
 import { eq } from "drizzle-orm"
 import { providerTestSchema } from "@/zod-schema"
 

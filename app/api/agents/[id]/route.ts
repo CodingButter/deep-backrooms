@@ -1,7 +1,7 @@
 // app/api/agents/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/db/schema";
-import { aiAgents } from "@/db/schema";
+import { db } from "@/db/schema/agentconversation";
+import { aiAgents } from "@/db/schema/agentconversation";
 import { insertAiAgentSchema } from "@/zod-schema";
 import { auth } from "@/auth";
 import { eq, and } from "drizzle-orm";

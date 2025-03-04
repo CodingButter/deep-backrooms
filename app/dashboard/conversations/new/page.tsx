@@ -1,7 +1,7 @@
 // app/dashboard/conversations/new/page.tsx
 import { auth } from "@/auth"
-import { db } from "@/db/schema"
-import { aiAgents } from "@/db/schema"
+import { db } from "@/db/schema/agentconversation"
+import { aiAgents } from "@/db/schema/agentconversation"
 import { eq } from "drizzle-orm"
 import ConversationForm from "@/components/conversations/ConversationForm"
 

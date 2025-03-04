@@ -1,94 +1,125 @@
 "use server"
 
-import { db } from "@/db/schema"
-import { aiAgents, providers } from "@/db/schema"
-import { insertAiAgentSchema } from "@/zod-schema"
-import { auth } from "@/auth"
-import { redirect } from "next/navigation"
-import { nanoid } from "@/lib/nanoid"
-import { eq } from "drizzle-orm"
 import { z } from "zod"
+import { db } from "@/db"
+import { agents } from "@/db/schema/agentconversation"
+import { insertAgentSchema } from "@/zod-schema"
+import { revalidatePath } from "next/cache"
+import { redirect } from "next/navigation"
 
-export type AgentFormState = {
-  success: boolean
-  message?: string
-  errors?: Record<string, string[]>
+// Define the schema for agent creation form validation
+export const agentFormSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  description: z.string().optional(),
+  providerId: z.string().min(1, "Provider is required"),
+  modelId: z.string().min(1, "Model is required"),
+  systemPrompt: z.string().min(10, "System prompt must be at least 10 characters"),
+  temperature: z.coerce.number().min(0).max(2).default(0.7),
+  maxTokens: z.coerce.number().int().positive().default(4096),
+  topP: z.coerce.number().min(0).max(1).default(1.0),
+  frequencyPenalty: z.coerce.number().min(-2).max(2).default(0),
+  memoryEnabled: z.boolean().default(false),
+  avatar: z.string().url().optional().or(z.literal("")),
+  toolAccess: z.array(z.string()).default([]),
+  sessionLimit: z.coerce.number().int().positive().default(5),
+  visibilityScope: z.enum(["private", "team", "public"]).default("private"),
+  categoryTags: z.array(z.string()).default([]),
+})
+
+export type AgentFormValues = z.infer<typeof agentFormSchema>
+
+export type CreateAgentState = {
+  errors?: {
+    name?: string[]
+    description?: string[]
+    providerId?: string[]
+    modelId?: string[]
+    systemPrompt?: string[]
+    temperature?: string[]
+    maxTokens?: string[]
+    topP?: string[]
+    frequencyPenalty?: string[]
+    memoryEnabled?: string[]
+    avatar?: string[]
+    toolAccess?: string[]
+    sessionLimit?: string[]
+    visibilityScope?: string[]
+    categoryTags?: string[]
+    _form?: string[]
+  }
+  message?: string | null
 }
 
 export async function createAgent(
-  prevState: AgentFormState | null,
+  userId: string,
+  prevState: CreateAgentState,
   formData: FormData
-): Promise<AgentFormState> {
-  // Check authentication
-  const session = await auth()
-  if (!session?.user?.id) {
-    return { success: false, message: "You must be signed in to create an agent" }
+): Promise<CreateAgentState> {
+  // Prepare the submission data from FormData
+  const rawData: Record<string, any> = {
+    name: formData.get("name"),
+    description: formData.get("description"),
+    providerId: formData.get("providerId"),
+    modelId: formData.get("modelId"),
+    systemPrompt: formData.get("systemPrompt"),
+    temperature: formData.get("temperature"),
+    maxTokens: formData.get("maxTokens"),
+    topP: formData.get("topP"),
+    frequencyPenalty: formData.get("frequencyPenalty"),
+    memoryEnabled: formData.get("memoryEnabled") === "true",
+    avatar: formData.get("avatar"),
+    sessionLimit: formData.get("sessionLimit"),
+    visibilityScope: formData.get("visibilityScope"),
   }
 
-  // Extract form data
-  const name = formData.get("name") as string
-  const providerId = formData.get("providerId") as string
-  const model = formData.get("model") as string
-  const systemPrompt = formData.get("systemPrompt") as string
-  const avatar = (formData.get("avatar") as string) || null
+  // Handle array values
+  const toolAccessArr = formData.getAll("toolAccess")
+  rawData.toolAccess = toolAccessArr.length > 0 ? toolAccessArr : []
 
-  // Create agent data object
-  const agentData = {
-    id: nanoid(),
-    userId: session.user.id,
-    name,
-    providerId,
-    model,
-    systemPrompt,
-    avatar,
+  const categoryTagsArr = formData.getAll("categoryTags")
+  rawData.categoryTags = categoryTagsArr.length > 0 ? categoryTagsArr : []
+
+  // Validate the form data
+  const validationResult = agentFormSchema.safeParse(rawData)
+
+  if (!validationResult.success) {
+    // Return validation errors
+    return {
+      errors: validationResult.error.flatten().fieldErrors,
+      message: "Form validation failed. Please check the form for errors.",
+    }
   }
 
   try {
-    // Validate data using Zod schema
-    const validatedData = insertAiAgentSchema.parse(agentData)
-
-    // Verify that the provider exists - using try/catch for better Edge compatibility
-    try {
-      const providerExists = await db
-        .select({ id: providers.id })
-        .from(providers)
-        .where(eq(providers.id, providerId))
-        .limit(1)
-
-      if (!providerExists.length) {
-        return { success: false, message: "Selected provider not found" }
-      }
-    } catch (dbError) {
-      console.error("Database error:", dbError)
-      return { success: false, message: "Error verifying provider" }
+    // Prepare the agent data for insertion
+    const agentData = {
+      ...validationResult.data,
+      userId,
+      toolAccess: JSON.stringify(validationResult.data.toolAccess || []),
+      categoryTags: JSON.stringify(validationResult.data.categoryTags || []),
+      persona: JSON.stringify({}), // Default empty persona
+      customModelParams: JSON.stringify({}), // Default empty customParams
+      createdAt: new Date(),
+      updatedAt: new Date(),
     }
 
-    // Insert agent into database
-    await db.insert(aiAgents).values(validatedData)
+    // Insert the agent into the database
+    await db.insert(agents).values(agentData)
 
-    // Return success
-    return { success: true }
+    // Revalidate the agents list page
+    revalidatePath("/dashboard/agents")
+
+    // Redirect to the agents page
+    redirect("/dashboard/agents")
   } catch (error) {
     console.error("Failed to create agent:", error)
 
-    // Handle Zod validation errors
-    if (error instanceof z.ZodError) {
-      const errors: Record<string, string[]> = {}
-
-      error.errors.forEach((err) => {
-        const field = err.path[0] as string
-        errors[field] = errors[field] || []
-        errors[field].push(err.message)
-      })
-
-      return {
-        success: false,
-        message: "Validation failed",
-        errors,
-      }
+    // Return a generic error message
+    return {
+      errors: {
+        _form: ["Failed to create agent. Please try again."],
+      },
+      message: "An unexpected error occurred. Please try again.",
     }
-
-    // Generic error
-    return { success: false, message: "Failed to create agent" }
   }
 }
