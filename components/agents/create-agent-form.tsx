@@ -34,7 +34,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
-import { AlertCircle, Bot, Loader2 } from "lucide-react"
+import { AlertCircle, Bot, HelpCircle, Info, Loader2 } from "lucide-react"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 // Common system prompt templates
 const SYSTEM_PROMPT_TEMPLATES = {
@@ -84,6 +85,32 @@ type Provider = {
 type CreateAgentFormProps = {
   providers: Provider[]
   userId: string
+}
+
+// InfoTooltip component for consistent tooltip styling
+function InfoTooltip({ content }: { content: string }) {
+  return (
+    <TooltipProvider>
+      <Tooltip delayDuration={300}>
+        <TooltipTrigger asChild>
+          <HelpCircle className="h-4 w-4 ml-1 text-muted-foreground cursor-help inline-flex" />
+        </TooltipTrigger>
+        <TooltipContent className="max-w-sm p-2 text-sm bg-background border shadow-md">
+          {content}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  )
+}
+
+// Section title with tooltip
+function SectionTitle({ title, description }: { title: string; description: string }) {
+  return (
+    <div className="flex items-center">
+      <h3 className="font-medium">{title}</h3>
+      <InfoTooltip content={description} />
+    </div>
+  )
 }
 
 export default function CreateAgentForm({ providers, userId }: CreateAgentFormProps) {
@@ -207,7 +234,10 @@ export default function CreateAgentForm({ providers, userId }: CreateAgentFormPr
         {/* Basic Information Section */}
         <Card>
           <CardHeader>
-            <CardTitle>Agent Details</CardTitle>
+            <CardTitle className="flex items-center">
+              Agent Details
+              <InfoTooltip content="Basic information about your AI agent that helps identify and describe it in the system." />
+            </CardTitle>
             <CardDescription>Create a new AI agent with custom personality</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -217,7 +247,10 @@ export default function CreateAgentForm({ providers, userId }: CreateAgentFormPr
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Agent Name</FormLabel>
+                    <FormLabel className="flex items-center">
+                      Agent Name
+                      <InfoTooltip content="The display name of your agent. This is how it will be identified in conversations and listings." />
+                    </FormLabel>
                     <FormControl>
                       <Input placeholder="My Custom Assistant" {...field} />
                     </FormControl>
@@ -231,7 +264,10 @@ export default function CreateAgentForm({ providers, userId }: CreateAgentFormPr
                 name="avatar"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Avatar URL</FormLabel>
+                    <FormLabel className="flex items-center">
+                      Avatar URL
+                      <InfoTooltip content="An optional image URL for your agent's avatar. This helps visually identify your agent in the interface." />
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="https://example.com/avatar.png"
@@ -250,7 +286,10 @@ export default function CreateAgentForm({ providers, userId }: CreateAgentFormPr
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel className="flex items-center">
+                    Description
+                    <InfoTooltip content="A short description of what this agent does and what it's good at. This helps users understand the agent's purpose and capabilities." />
+                  </FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Describe what this agent does and its specialties..."
@@ -271,7 +310,10 @@ export default function CreateAgentForm({ providers, userId }: CreateAgentFormPr
         {/* Provider and Model Selection */}
         <Card>
           <CardHeader>
-            <CardTitle>Provider & Model</CardTitle>
+            <CardTitle className="flex items-center">
+              Provider & Model
+              <InfoTooltip content="The AI service provider and specific model that powers your agent. Different models have different capabilities, knowledge cutoffs, and pricing." />
+            </CardTitle>
             <CardDescription>Choose the AI provider and specific model</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -280,7 +322,10 @@ export default function CreateAgentForm({ providers, userId }: CreateAgentFormPr
               name="providerId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Provider</FormLabel>
+                  <FormLabel className="flex items-center">
+                    Provider
+                    <InfoTooltip content="The AI service provider (e.g., OpenAI, Anthropic, etc.) that will power this agent. Each provider has different models, pricing, and capabilities." />
+                  </FormLabel>
                   <Select
                     onValueChange={(value) => {
                       field.onChange(value)
@@ -311,7 +356,10 @@ export default function CreateAgentForm({ providers, userId }: CreateAgentFormPr
               name="modelId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Model</FormLabel>
+                  <FormLabel className="flex items-center">
+                    Model
+                    <InfoTooltip content="Specific AI model to use. Different models have different capabilities, context windows, and pricing. Newer models tend to have more capabilities but may cost more to use." />
+                  </FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -343,12 +391,18 @@ export default function CreateAgentForm({ providers, userId }: CreateAgentFormPr
         {/* System Prompt Section */}
         <Card>
           <CardHeader>
-            <CardTitle>Personality & Behavior</CardTitle>
+            <CardTitle className="flex items-center">
+              Personality & Behavior
+              <InfoTooltip content="This defines how your agent behaves, the knowledge it has access to, and its communication style. The system prompt is the most important factor in determining your agent's capabilities." />
+            </CardTitle>
             <CardDescription>Define your agent's core personality</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex justify-between items-center">
-              <FormLabel>System Prompt</FormLabel>
+              <FormLabel className="flex items-center">
+                System Prompt
+                <InfoTooltip content="The system prompt is a set of instructions given to the AI model that defines how it should behave. It's like programming the agent's personality and capabilities." />
+              </FormLabel>
               <Tabs value={templateTab} onValueChange={setTemplateTab}>
                 <TabsList>
                   <TabsTrigger value="custom" onClick={() => setTemplateTab("custom")}>
@@ -406,7 +460,7 @@ export default function CreateAgentForm({ providers, userId }: CreateAgentFormPr
                   variant="outline"
                   size="sm"
                   onClick={() => applyTemplate(key as keyof typeof SYSTEM_PROMPT_TEMPLATES)}
-                  className="text-xs bg-background"
+                  className="text-xs bg-background text-foreground"
                 >
                   {label}
                 </Button>
@@ -420,7 +474,10 @@ export default function CreateAgentForm({ providers, userId }: CreateAgentFormPr
         {/* Model Parameters Section */}
         <Card>
           <CardHeader>
-            <CardTitle>Model Parameters</CardTitle>
+            <CardTitle className="flex items-center">
+              Model Parameters
+              <InfoTooltip content="Fine-tune how the AI model generates responses. These parameters affect creativity, consistency, and other aspects of the agent's output." />
+            </CardTitle>
             <CardDescription>Fine-tune your agent's response characteristics</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -431,7 +488,10 @@ export default function CreateAgentForm({ providers, userId }: CreateAgentFormPr
               render={({ field }) => (
                 <FormItem>
                   <div className="flex justify-between items-center">
-                    <FormLabel>Temperature</FormLabel>
+                    <FormLabel className="flex items-center">
+                      Temperature
+                      <InfoTooltip content="Controls randomness in the output. Lower values (0.1-0.5) make responses more deterministic and focused. Higher values (0.7-1.0) make responses more creative and varied. Use lower values for factual tasks and higher for creative tasks." />
+                    </FormLabel>
                     <span className="text-sm text-muted-foreground">{field.value.toFixed(2)}</span>
                   </div>
                   <FormControl>
@@ -459,7 +519,10 @@ export default function CreateAgentForm({ providers, userId }: CreateAgentFormPr
               render={({ field }) => (
                 <FormItem>
                   <div className="flex justify-between items-center">
-                    <FormLabel>Top P</FormLabel>
+                    <FormLabel className="flex items-center">
+                      Top P
+                      <InfoTooltip content="Nucleus sampling parameter that controls diversity by limiting token selection to the smallest set of tokens whose cumulative probability exceeds the value p. Lower values (0.1-0.5) lead to more focused, predictable outputs. Higher values (0.7-1.0) allow for more diversity." />
+                    </FormLabel>
                     <span className="text-sm text-muted-foreground">{field.value.toFixed(2)}</span>
                   </div>
                   <FormControl>
@@ -487,7 +550,10 @@ export default function CreateAgentForm({ providers, userId }: CreateAgentFormPr
               render={({ field }) => (
                 <FormItem>
                   <div className="flex justify-between items-center">
-                    <FormLabel>Frequency Penalty</FormLabel>
+                    <FormLabel className="flex items-center">
+                      Frequency Penalty
+                      <InfoTooltip content="Reduces repetition by penalizing tokens that have already appeared in the text. Higher values (0.5-1.0) make the model less likely to repeat the same phrases or topics. Useful for longer outputs where repetition is a concern." />
+                    </FormLabel>
                     <span className="text-sm text-muted-foreground">{field.value.toFixed(2)}</span>
                   </div>
                   <FormControl>
@@ -513,7 +579,10 @@ export default function CreateAgentForm({ providers, userId }: CreateAgentFormPr
               name="maxTokens"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Max Tokens</FormLabel>
+                  <FormLabel className="flex items-center">
+                    Max Tokens
+                    <InfoTooltip content="The maximum length of response the model can generate, measured in tokens (roughly 4 characters = 1 token). Higher values allow for longer responses but may increase costs. Most conversations work well with 1024-4096 tokens." />
+                  </FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -538,7 +607,10 @@ export default function CreateAgentForm({ providers, userId }: CreateAgentFormPr
         {/* Advanced Settings Section */}
         <Card>
           <CardHeader>
-            <CardTitle>Advanced Settings</CardTitle>
+            <CardTitle className="flex items-center">
+              Advanced Settings
+              <InfoTooltip content="Additional configuration options that affect how your agent operates, remembers conversations, and interacts with users and other tools." />
+            </CardTitle>
             <CardDescription>Customize agent behavior and visibility</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -549,7 +621,10 @@ export default function CreateAgentForm({ providers, userId }: CreateAgentFormPr
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
-                    <FormLabel className="text-base">Memory Enabled</FormLabel>
+                    <FormLabel className="text-base flex items-center">
+                      Memory Enabled
+                      <InfoTooltip content="When enabled, the agent will remember previous conversations with users. This allows for more consistent and contextual interactions across multiple chat sessions." />
+                    </FormLabel>
                     <FormDescription>
                       If enabled, the agent will remember previous conversations.
                     </FormDescription>
@@ -567,7 +642,10 @@ export default function CreateAgentForm({ providers, userId }: CreateAgentFormPr
               name="sessionLimit"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Session Limit</FormLabel>
+                  <FormLabel className="flex items-center">
+                    Session Limit
+                    <InfoTooltip content="Maximum number of conversation sessions before memory is reset. This prevents the agent from accumulating too much conversation history, which could impact performance or lead to context confusion." />
+                  </FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -591,7 +669,10 @@ export default function CreateAgentForm({ providers, userId }: CreateAgentFormPr
               name="visibilityScope"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Visibility Scope</FormLabel>
+                  <FormLabel className="flex items-center">
+                    Visibility Scope
+                    <InfoTooltip content="Controls who can see and use this agent. Private agents are only available to you, team agents can be used by your team members, and public agents are available to everyone using the platform." />
+                  </FormLabel>
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
@@ -625,7 +706,10 @@ export default function CreateAgentForm({ providers, userId }: CreateAgentFormPr
 
             {/* Tool Access */}
             <FormItem className="md:col-span-2">
-              <FormLabel>Tool Access</FormLabel>
+              <FormLabel className="flex items-center">
+                Tool Access
+                <InfoTooltip content="Capabilities your agent can access beyond conversation. Web search allows the agent to search the internet, code interpreter lets it write and run code, file access permits reading and writing files, etc. Each tool adds capabilities but may increase costs." />
+              </FormLabel>
               <div className="flex flex-wrap gap-2">
                 {TOOL_ACCESS_OPTIONS.map((tool) => (
                   <Badge
@@ -643,13 +727,16 @@ export default function CreateAgentForm({ providers, userId }: CreateAgentFormPr
 
             {/* Category Tags */}
             <FormItem className="md:col-span-2">
-              <FormLabel>Category Tags</FormLabel>
-              <div className="flex flex-wrap gap-2">
+              <FormLabel className="flex items-center">
+                Category Tags
+                <InfoTooltip content="Tags help organize and categorize your agents. These tags make it easier to find specific agents and understand their purpose at a glance. They also help with filtering and searching in the agent library." />
+              </FormLabel>
+              <div className="flex flex-wrap gap-2 text-foreground bg-background">
                 {CATEGORY_TAGS_OPTIONS.map((tag) => (
                   <Badge
                     key={tag.value}
                     variant={tagsSelected.includes(tag.value) ? "default" : "outline"}
-                    className="cursor-pointer"
+                    className="cursor-pointer text-foreground"
                     onClick={() => toggleTag(tag.value)}
                   >
                     {tag.label}

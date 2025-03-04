@@ -5,7 +5,7 @@ import "@/envConfig"
 import type { Config } from "drizzle-kit"
 
 export default {
-  schema: "./db/schema.ts",
+  schema: "./db",
   out: "./migrations",
   dialect: "turso",
   dbCredentials: {

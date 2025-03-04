@@ -67,11 +67,12 @@
   /* Neon theme */
   .neon {
     --color-background: #09090b;
-    --color-foreground: #fafafa;
+    --color-foreground: #09090b;
     --color-primary: #ff338b;
     --color-secondary: #0044ff;
     --color-accent: #21c45d;
     --color-border: #27272a;
+    --color-card: #fafafa;
   }
 }
 

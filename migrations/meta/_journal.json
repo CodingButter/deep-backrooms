@@ -43,6 +43,13 @@
       "when": 1740627849236,
       "tag": "0005_friendly_human_robot",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1741131722929,
+      "tag": "0006_daffy_lester",
+      "breakpoints": true
     }
   ]
 }
