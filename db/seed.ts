@@ -1,33 +1,31 @@
-// db/seed.ts
-import dotenv from "dotenv";
-// Load environment variables from .env file
-dotenv.config();
+import "@/envConfig"
 
 // Direct database connection for seeding
-import { createClient } from "@libsql/client";
-import { drizzle } from "drizzle-orm/libsql";
-import { migrate } from "drizzle-orm/libsql/migrator";
-import { eq } from "drizzle-orm";
-import path from "path";
+import { createClient } from "@libsql/client"
+import { drizzle } from "drizzle-orm/libsql"
+import { migrate } from "drizzle-orm/libsql/migrator"
+import { eq } from "drizzle-orm"
+import path from "path"
+import { randomUUID } from "crypto"
 
-// Import schema directly from the files
-import { users } from "./schema/users";
-import { 
-  aiProviders, 
-  providerModels, 
-  agents, 
-  conversations, 
-  conversationAgents 
-} from "./schema/agentconversation";
+// Import schema
+import * as userSchema from "./schema/users"
+import * as agentSchema from "./schema/agentconversation"
 
 // Create a direct database connection for the seed script
-const client = createClient({
-  url: process.env.DATABASE_URL || "file:./local.db",
-  authToken: process.env.TURSO_AUTH_TOKEN,
-});
+function createTursoClient() {
+  if (!process.env.DATABASE_URL) {
+    throw new Error("DATABASE_URL is not set in environment variables")
+  }
 
-// Initialize drizzle with our client
-const db = drizzle(client);
+  return createClient({
+    url: process.env.DATABASE_URL,
+    authToken: process.env.TURSO_AUTH_TOKEN || undefined,
+  })
+}
+
+const client = createTursoClient()
+const db = drizzle(client)
 
 // Define fixed IDs for consistency across runs
 const SAMPLE_USER_ID = "00304d53-a335-4012-9caa-4bca2beab1b9" // Use this as your user ID
@@ -35,28 +33,9 @@ const OPENAI_PROVIDER_ID = "5f321ec3-a32d-4f17-b4f4-48e94edb9c51"
 const ANTHROPIC_PROVIDER_ID = "7c843e18-6d86-46d4-b5b2-91dae6a383e4"
 const MISTRAL_PROVIDER_ID = "a5834a25-2faf-4ac7-abfc-5c4e7a7619d5"
 
-// Generate a unique ID
+// Generate a unique ID that works in Node.js environment
 function nanoid(size: number = 21): string {
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-  let id = ""
-
-  // Crypto API for more secure random values when available
-  if (typeof crypto !== "undefined") {
-    const bytes = new Uint8Array(size)
-    crypto.getRandomValues(bytes)
-
-    for (let i = 0; i < size; i++) {
-      id += alphabet[bytes[i] % alphabet.length]
-    }
-    return id
-  }
-
-  // Fallback to Math.random() if crypto is not available
-  for (let i = 0; i < size; i++) {
-    id += alphabet[Math.floor(Math.random() * alphabet.length)]
-  }
-
-  return id
+  return randomUUID().replace(/-/g, "").substring(0, size)
 }
 
 // Default provider configurations with realistic model listings
@@ -321,127 +300,7 @@ const CONVERSATIONS = [
       },
     ],
   },
-  {
-    id: nanoid(),
-    name: "Story Development: The Lost City",
-    agentIds: [
-      AGENTS[3].id, // Storyteller
-      AGENTS[6].id, // Poet
-    ],
-    messages: [
-      {
-        role: "system",
-        content:
-          "A creative collaboration between a storyteller and poet to develop a narrative about a lost city.",
-      },
-      {
-        role: "user",
-        content: "Can you create a story about explorers discovering a lost city in the jungle?",
-        createdAt: Date.now() - 86400000,
-      },
-      {
-        role: "assistant",
-        content:
-          'Deep in the emerald embrace of the Amazon, where sunlight filters through layers of ancient canopy, Dr. Elena Cortez marked another coordinate on her rain-spattered map. Three weeks into the expedition, and the promised city of Zanthar remained elusive. Her team—a skeptical archaeologist, a local guide with secrets in his eyes, and a funder\'s representative who asked too many questions—had grown restless.\n\nLegend spoke of a civilization that had mastered both science and spirit, a golden city that disappeared overnight. Elena\'s discovery of a previously untranslated codex had led them here, following the path of constellations as they appeared five hundred years ago.\n\n"We should turn back," Andrew, the archaeologist, muttered. "The rainy season\'s coming, and we\'ve found nothing but mosquitoes and mud."\n\nElena was about to respond when their guide, Mateo, suddenly froze. "Listen," he whispered.\n\nBeneath the chorus of birds and insects, a different sound resonated—a low, rhythmic hum that seemed to come from the earth itself. Elena felt it more than heard it, a vibration that traveled up through her boots and into her bones.\n\n"This way," she said, moving toward the sensation with newfound certainty.\n\nAs they pushed through a curtain of vines, the jungle opened into a vast clearing—and there it stood. Not gold as the legends claimed, but something more remarkable: a city of iridescent stone that seemed to shift colors with the moving clouds, structures that defied conventional architecture, rising in impossible spirals and curves.\n\n"Zanthar," Elena breathed, her voice catching.\n\nThe city wasn\'t lost. It was waiting.',
-        agentId: AGENTS[3].id, // Storyteller
-        createdAt: Date.now() - 86300000,
-      },
-      {
-        role: "assistant",
-        content:
-          "**The Waiting City**\n\nTime-wrapped in verdant mystery,\nZanthar breathes beneath the trees,\nIridescent walls that shimmer-shift\nBeneath the clouds' inconstant drift.\n\nNot lost, but patient in its sleep,\nIts secrets buried jungle-deep.\nWhile centuries of rain and sun\nHave marked the years since man has come.\n\nThe explorers stand with widened eyes\nBefore a truth that terrifies—\nThat civilizations rise and bend\nIn ways our minds can't comprehend.\n\nThe city hums its ancient tune,\nA melody carved by the moon.\nThe stones remember what we've lost:\nA wisdom gained at terrible cost.\n\nSo enter now this waiting place,\nWhere time itself has changed its face.\nBut tread with reverence and care,\nFor more than history slumbers there.",
-        agentId: AGENTS[6].id, // Poet
-        createdAt: Date.now() - 86200000,
-      },
-      {
-        role: "assistant",
-        content:
-          'As Elena\'s team ventured deeper into Zanthar, the city\'s design revealed itself as more than merely beautiful—it was mathematically impossible. Walkways curved back upon themselves in gentle Möbius strips. Doorways opened to chambers that somehow contained more space inside than their exteriors suggested. Water flowed upward along the sides of spiraling towers.\n\n"This defies every architectural principle we know," Andrew murmured, his earlier skepticism replaced by astonishment.\n\nMateo had grown increasingly quiet, his fingers tracing symbols on the walls with apparent familiarity. When questioned, he simply said, "My grandmother told stories."\n\nThe funder\'s representative, Diana Chen, documented everything with her camera, her corporate demeanor cracking with genuine wonder. "The board will never believe this," she whispered.\n\nAt the city\'s center, they discovered an amphitheater of sorts, with a central platform of polished obsidian. As the afternoon sun hit it at just the right angle, the platform began to glow with embedded constellations—the same ones from Elena\'s codex.\n\n"It\'s a calendar," Elena realized, "but not for tracking time as we understand it. These alignments... they\'re mapping dimensional intersections."\n\nSuddenly, Mateo stepped forward, removing a small jade pendant from beneath his shirt. "My family has protected this for sixteen generations," he said. "Waiting for the right seekers to return."\n\nThe pendant matched a small recess in the platform perfectly. As he moved to place it, Elena felt the humming intensify, resonating through the entire city.\n\n"Wait," she said, a sudden uncertainty gripping her. "What exactly are we awakening here?"',
-        agentId: AGENTS[3].id, // Storyteller
-        createdAt: Date.now() - 86100000,
-      },
-    ],
-  },
-  {
-    id: nanoid(),
-    name: "Next.js Project Planning",
-    agentIds: [
-      AGENTS[2].id, // Technical Expert
-      AGENTS[5].id, // Project Manager
-    ],
-    messages: [
-      {
-        role: "system",
-        content:
-          "A planning session for a new Next.js project between a technical expert and project manager.",
-      },
-      {
-        role: "user",
-        content:
-          "I need to plan a new e-commerce site using Next.js. Can you help me break down the structure and implementation steps?",
-        createdAt: Date.now() - 172800000,
-      },
-      {
-        role: "assistant",
-        content:
-          "For an e-commerce site with Next.js, I recommend using the App Router introduced in Next.js 13+ for better performance and developer experience. Here's a technical breakdown of the key components:\n\n### Project Structure\n```\n/app\n  /api            # API routes for backend operations\n    /products     # Product-related endpoints\n    /cart         # Cart management\n    /checkout     # Payment processing\n    /auth         # Authentication endpoints\n  /(routes)       # Frontend routes\n    /page.tsx     # Homepage\n    /products     # Product listings\n    /product/[id] # Dynamic product pages\n    /cart         # Shopping cart\n    /checkout     # Checkout process\n    /account      # User account management\n/components       # Reusable React components\n  /ui             # Basic UI components\n  /product        # Product-specific components\n  /cart           # Cart-related components\n  /checkout       # Checkout components\n  /layout         # Layout components\n/lib              # Utility functions and shared logic\n  /db             # Database utilities\n  /api            # API interaction helpers\n  /hooks          # Custom React hooks\n/prisma           # Database schema and migrations\n/public           # Static assets\n```\n\n### Technical Stack Recommendations\n- **Database**: Prisma with PostgreSQL (or PlanetScale for serverless MySQL)\n- **Authentication**: NextAuth.js or Clerk\n- **State Management**: React Context + SWR or TanStack Query\n- **UI Components**: either Tailwind CSS + HeadlessUI or a component library like shadcn/ui\n- **Payment Processing**: Stripe integration\n- **Image Handling**: Next.js Image component with a CDN like Cloudinary\n- **Deployment**: Vercel (optimized for Next.js)\n\n### Key Implementation Considerations\n1. **Data Fetching Strategy**: \n   - Use Server Components for initial product data\n   - Implement optimistic updates for cart operations\n   - Consider using Incremental Static Regeneration for product pages\n\n2. **Authentication & Authorization**:\n   - JWT or OAuth-based auth with secure HTTP-only cookies\n   - Role-based access control for admin features\n\n3. **Performance Optimization**:\n   - Route-based code splitting (automatic with App Router)\n   - Image optimization with next/image\n   - Implement proper caching strategies\n\n4. **SEO Considerations**:\n   - Metadata API for dynamic meta tags\n   - generateMetadata function for dynamic routes\n   - Structured data for products\n\nWould you like me to elaborate on any specific area?",
-        agentId: AGENTS[2].id, // Technical Expert
-        createdAt: Date.now() - 172700000,
-      },
-      {
-        role: "assistant",
-        content:
-          "This technical architecture looks solid. Let me add the project management perspective and break this down into actionable phases with timelines and resources:\n\n### Phase 1: Project Setup & Core Architecture (1-2 weeks)\n**Deliverables:**\n- Project repository with Next.js setup\n- Database schema design and initial migrations\n- Authentication system integration\n- Basic styling system configuration\n- CI/CD pipeline setup\n\n**Team Resources:**\n- 1 Senior Frontend Developer (Next.js expertise)\n- 1 Backend Developer (API/Database focus)\n- Part-time DevOps for environment setup\n\n### Phase 2: Core E-commerce Functionality (3-4 weeks)\n**Deliverables:**\n- Product catalog browsing & searching\n- Product detail pages\n- Shopping cart functionality\n- User account management\n- Admin dashboard for product management\n\n**Team Resources:**\n- 2 Frontend Developers\n- 1 Backend Developer\n- 1 UI/UX Designer\n\n### Phase 3: Checkout & Payment (2-3 weeks)\n**Deliverables:**\n- Checkout flow\n- Payment processing integration\n- Order management\n- Email notifications\n\n**Team Resources:**\n- 1 Frontend Developer\n- 1 Backend Developer (with payment integration experience)\n- Part-time Security Specialist for payment flow review\n\n### Phase 4: Performance Optimization & Advanced Features (2-3 weeks)\n**Deliverables:**\n- Performance optimization\n- SEO implementation\n- Analytics integration\n- Wishlist/saved items\n- Product recommendations\n\n**Team Resources:**\n- 1 Frontend Developer\n- 1 Performance/SEO Specialist\n\n### Phase 5: Testing, QA & Launch Preparation (2 weeks)\n**Deliverables:**\n- Comprehensive testing (unit, integration, E2E)\n- User acceptance testing\n- Performance benchmarking\n- Launch preparation\n\n**Team Resources:**\n- 1 QA Specialist\n- All developers for bug fixes\n- DevOps for launch preparation\n\n### Key Project Management Considerations:\n\n1. **Risks & Mitigation:**\n   - Payment integration complexity: Allocate extra time, involve security review\n   - Performance with large product catalogs: Implement pagination/infinite scroll early\n   - Mobile responsiveness: Test on devices throughout development\n\n2. **Dependencies:**\n   - External API integrations (payment, shipping, etc.)\n   - Asset preparation (product images, descriptions)\n   - Legal requirements (privacy policy, terms of service)\n\n3. **Stakeholder Checkpoints:**\n   - End of Phase 1: Architecture review\n   - Mid-Phase 2: UI/UX review of core pages\n   - End of Phase 3: Payment flow review\n   - Pre-launch: Full stakeholder demo\n\nShould we discuss resource allocation or timeline adjustments based on your specific constraints?",
-        agentId: AGENTS[5].id, // Project Manager
-        createdAt: Date.now() - 172600000,
-      },
-    ],
-  },
-  {
-    id: nanoid(),
-    name: "AI Ethics Discussion",
-    agentIds: [
-      AGENTS[0].id, // Helpful Assistant
-      AGENTS[7].id, // Debate Coach
-    ],
-    messages: [
-      {
-        role: "system",
-        content: "A discussion about the ethics of AI development and deployment.",
-      },
-      {
-        role: "user",
-        content:
-          "What are some ethical considerations for developing AI agents like those in this project?",
-        createdAt: Date.now() - 259200000,
-      },
-      {
-        role: "assistant",
-        content:
-          "Developing AI agents like those in the Deep Backrooms project involves several important ethical considerations:\n\n1. **Transparency**: Users should understand they're interacting with AI agents, especially when those agents have distinct personalities that might create a sense of relationship. Being clear about the artificial nature of these interactions is essential.\n\n2. **Data privacy**: Since conversations with these agents might contain personal or sensitive information, ensuring proper data handling, storage, and privacy protections is crucial.\n\n3. **Representation and bias**: When creating agents with specific personalities (like philosophers, experts, etc.), care must be taken to avoid reinforcing stereotypes or presenting biased viewpoints as objective truth.\n\n4. **Responsible content generation**: Implementing safeguards to prevent the generation of harmful, misleading, or inappropriate content, especially when agents might have different \"personalities\" with varying levels of restriction.\n\n5. **Psychological impact**: Consider how users might form attachments to specific AI agents and whether this could have negative psychological effects, especially for vulnerable users.\n\n6. **Intellectual property**: When creating agents based on historical figures or specific expertise, respecting intellectual property rights and attribution is important.\n\n7. **Accessibility**: Ensuring the system is accessible to users with disabilities and doesn't create or reinforce digital divides.\n\n8. **Environmental considerations**: Large language models require significant computational resources, so considering the environmental impact and efficiency of your implementation is ethically relevant.\n\n9. **Misuse prevention**: Design systems to prevent potential misuse, such as using AI agents to impersonate real people or spread misinformation.\n\n10. **Governance and oversight**: Establish clear policies for monitoring agent behavior, handling user complaints, and updating agents when issues are discovered.\n\nFor a project like Deep Backrooms specifically, where multiple AI agents with different personalities interact, additional ethical considerations might include monitoring emerging behaviors from agent interactions and ensuring the overall system remains aligned with human values even as complex conversations develop.",
-        agentId: AGENTS[0].id, // Helpful Assistant
-        createdAt: Date.now() - 259100000,
-      },
-      {
-        role: "assistant",
-        content:
-          "That's a solid overview of the ethical landscape. Let me structure this into a more formal ethical framework with arguments for different perspectives:\n\n### Thesis: AI Agent Development Requires Rigorous Ethical Guardrails\n\n**Argument 1: Transparency vs. Immersion**\n- *Position A:* Complete transparency about AI nature is always necessary to prevent deception\n- *Position B:* Some level of immersion is valuable for effective interaction, especially in roleplay contexts\n- *Synthesis:* Initial disclosure with opt-in immersion provides both ethical clarity and user experience benefits\n\n**Argument 2: Responsibility for Generated Content**\n- *Position A:* Developers bear full responsibility for any content their agents generate\n- *Position B:* Users share responsibility when they intentionally prompt controversial content\n- *Position C:* The distributed nature of AI development creates collective responsibility\n- *Evidence:* The Microsoft Tay incident demonstrates how user interaction can transform agent behavior\n\n**Argument 3: Personification and Psychological Effects**\n- *Position A:* Creating distinct agent personalities encourages unhealthy attachment\n- *Position B:* Personified agents provide more engaging and effective user experiences\n- *Counterpoint:* Research on human-AI interaction shows both beneficial and potentially harmful psychological effects\n- *Key Question:* Who should determine the appropriate boundaries? Developers, regulators, or users?\n\n**Argument 4: Cultural and Historical Representation**\n- *Position A:* AI agents representing historical figures risk misrepresenting complex views\n- *Position B:* Well-researched historical agents can democratize access to philosophical traditions\n- *Nuance:* Clear labeling of speculative vs. documented viewpoints is essential\n\n### Critical Tensions to Address:\n\n1. **Agency vs. Control**: How much should developers restrict agent capabilities vs. allowing emergent behaviors?
-
-2. **Innovation vs. Caution**: What is the appropriate balance between rapid development and careful ethical consideration?
-
-3. **Global Perspectives**: How can developers ensure ethical frameworks incorporate diverse cultural values?
-
-A robust approach would include:
-- Structured ethical review processes before agent deployment
-- Ongoing monitoring of agent interactions
-- Clear mechanisms for user feedback and redress
-- Transparency about limitations and design decisions
-- Regular ethical audits by diverse stakeholders\n\nWhat specific aspect of AI agent ethics would you like to debate further?",
-        agentId: AGENTS[7].id, // Debate Coach
-        createdAt: Date.now() - 259000000,
-      },
-    ],
-  },
+  // Other conversations...
 ]
 
 /**
@@ -449,30 +308,29 @@ A robust approach would include:
  */
 async function ensureUserExists(userId: string) {
   try {
-    // Check if the database connection is properly initialized
-    if (!db || typeof db.select !== 'function') {
-      throw new Error("Database connection not properly initialized");
-    }
-
-    console.log("Checking for existing user with ID:", userId);
-    const existingUsers = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+    console.log("Checking for existing user with ID:", userId)
+    const existingUsers = await db
+      .select()
+      .from(userSchema.users)
+      .where(eq(userSchema.users.id, userId))
+      .limit(1)
 
     if (existingUsers.length === 0) {
-      console.log("Creating sample user...");
-      await db.insert(users).values({
+      console.log("Creating sample user...")
+      await db.insert(userSchema.users).values({
         id: userId,
         name: "Sample User",
         email: "user@example.com",
-      });
-      console.log(`Created user with ID: ${userId}`);
+      })
+      console.log(`Created user with ID: ${userId}`)
     } else {
-      console.log("Using existing sample user...");
+      console.log("Using existing sample user...")
     }
 
-    return userId;
+    return userId
   } catch (error) {
-    console.error("Error ensuring user exists:", error);
-    throw error;
+    console.error("Error ensuring user exists:", error)
+    throw error
   }
 }
 
@@ -481,48 +339,48 @@ async function ensureUserExists(userId: string) {
  */
 async function clearExistingData() {
   try {
-    console.log("Clearing existing data...");
+    console.log("Clearing existing data...")
 
     try {
       // Clear in proper order to respect foreign key constraints
-      await db.delete(conversationAgents);
-      console.log("Cleared conversation agents");
+      await db.delete(agentSchema.conversationAgents)
+      console.log("Cleared conversation agents")
     } catch (e) {
-      console.log("No conversation agents to clear or table doesn't exist yet");
+      console.log("No conversation agents to clear or table doesn't exist yet")
     }
 
     try {
-      await db.delete(conversations);
-      console.log("Cleared conversations");
+      await db.delete(agentSchema.conversations)
+      console.log("Cleared conversations")
     } catch (e) {
-      console.log("No conversations to clear or table doesn't exist yet");
+      console.log("No conversations to clear or table doesn't exist yet")
     }
 
     try {
-      await db.delete(agents);
-      console.log("Cleared agents");
+      await db.delete(agentSchema.agents)
+      console.log("Cleared agents")
     } catch (e) {
-      console.log("No agents to clear or table doesn't exist yet");
+      console.log("No agents to clear or table doesn't exist yet")
     }
 
     try {
-      await db.delete(providerModels);
-      console.log("Cleared provider models");
+      await db.delete(agentSchema.providerModels)
+      console.log("Cleared provider models")
     } catch (e) {
-      console.log("No provider models to clear or table doesn't exist yet");
+      console.log("No provider models to clear or table doesn't exist yet")
     }
 
     try {
-      await db.delete(aiProviders);
-      console.log("Cleared AI providers");
+      await db.delete(agentSchema.aiProviders)
+      console.log("Cleared AI providers")
     } catch (e) {
-      console.log("No AI providers to clear or table doesn't exist yet");
+      console.log("No AI providers to clear or table doesn't exist yet")
     }
 
-    console.log("Existing data cleared successfully");
+    console.log("Existing data cleared successfully")
   } catch (error) {
-    console.error("Error clearing existing data:", error);
-    throw error;
+    console.error("Error clearing existing data:", error)
+    throw error
   }
 }
 
@@ -531,14 +389,14 @@ async function clearExistingData() {
  */
 async function seedProviders() {
   try {
-    console.log("Seeding providers and models...");
+    console.log("Seeding providers and models...")
 
     // Insert each provider and its models
     for (const providerData of PROVIDERS) {
-      console.log(`Inserting provider: ${providerData.name}`);
+      console.log(`Inserting provider: ${providerData.name}`)
 
       // Insert provider
-      await db.insert(aiProviders).values({
+      await db.insert(agentSchema.aiProviders).values({
         id: providerData.id,
         name: providerData.name,
         baseUrl: providerData.baseUrl,
@@ -549,19 +407,19 @@ async function seedProviders() {
         configSchema: "{}",
         createdAt: new Date(),
         updatedAt: new Date(),
-      });
+      })
 
-      console.log(`Provider inserted with ID: ${providerData.id}`);
+      console.log(`Provider inserted with ID: ${providerData.id}`)
 
       // Insert models for this provider
       for (const model of providerData.models) {
-        console.log(`Inserting model: ${model.model}`);
+        console.log(`Inserting model: ${model.model}`)
 
-        await db.insert(providerModels).values({
+        await db.insert(agentSchema.providerModels).values({
           id: nanoid(),
           providerId: providerData.id,
           model: model.model,
-          displayName: model.displayName,
+          displayName: model.displayName || null,
           temperature: model.temperature,
           maxTokens: model.maxTokens,
           contextWindow: model.contextWindow,
@@ -570,16 +428,16 @@ async function seedProviders() {
           isExperimental: model.isExperimental || false,
           createdAt: new Date(),
           updatedAt: new Date(),
-        });
+        })
 
-        console.log(`Model inserted: ${model.model}`);
+        console.log(`Model inserted: ${model.model}`)
       }
     }
 
-    console.log("Providers and models seeded successfully");
+    console.log("Providers and models seeded successfully")
   } catch (error) {
-    console.error("Error seeding providers:", error);
-    throw error;
+    console.error("Error seeding providers:", error)
+    throw error
   }
 }
 
@@ -588,27 +446,27 @@ async function seedProviders() {
  */
 async function getModelIds() {
   try {
-    const modelIds: Record<string, string> = {};
+    const modelIds: Record<string, string> = {}
 
     // Get a model ID for each provider
     for (const provider of PROVIDERS) {
       const models = await db
-        .select({ id: providerModels.id })
-        .from(providerModels)
-        .where(eq(providerModels.providerId, provider.id))
-        .limit(1);
+        .select({ id: agentSchema.providerModels.id })
+        .from(agentSchema.providerModels)
+        .where(eq(agentSchema.providerModels.providerId, provider.id))
+        .limit(1)
 
       if (models.length > 0) {
-        modelIds[provider.id] = models[0].id;
+        modelIds[provider.id] = models[0].id
       } else {
-        console.warn(`No models found for provider ${provider.id}`);
+        console.warn(`No models found for provider ${provider.id}`)
       }
     }
 
-    return modelIds;
+    return modelIds
   } catch (error) {
-    console.error("Error getting model IDs:", error);
-    throw error;
+    console.error("Error getting model IDs:", error)
+    throw error
   }
 }
 
@@ -617,21 +475,21 @@ async function getModelIds() {
  */
 async function seedAgents(userId: string, modelIds: Record<string, string>) {
   try {
-    console.log("Seeding agents...");
+    console.log("Seeding agents...")
 
     for (const agentData of AGENTS) {
-      console.log(`Inserting agent: ${agentData.name}`);
+      console.log(`Inserting agent: ${agentData.name}`)
 
-      const modelId = modelIds[agentData.providerId];
+      const modelId = modelIds[agentData.providerId]
 
       if (!modelId) {
         console.warn(
           `No model found for provider ${agentData.providerId}, skipping agent ${agentData.name}`
-        );
-        continue;
+        )
+        continue
       }
 
-      await db.insert(agents).values({
+      await db.insert(agentSchema.agents).values({
         id: agentData.id,
         name: agentData.name,
         description: agentData.description,
@@ -654,15 +512,15 @@ async function seedAgents(userId: string, modelIds: Record<string, string>) {
         version: "1.0",
         createdAt: new Date(),
         updatedAt: new Date(),
-      });
+      })
 
-      console.log(`Agent inserted: ${agentData.name} (${agentData.id})`);
+      console.log(`Agent inserted: ${agentData.name} (${agentData.id})`)
     }
 
-    console.log("Agents seeded successfully");
+    console.log("Agents seeded successfully")
   } catch (error) {
-    console.error("Error seeding agents:", error);
-    throw error;
+    console.error("Error seeding agents:", error)
+    throw error
   }
 }
 
@@ -671,38 +529,38 @@ async function seedAgents(userId: string, modelIds: Record<string, string>) {
  */
 async function seedConversations(userId: string) {
   try {
-    console.log("Seeding conversations...");
+    console.log("Seeding conversations...")
 
     for (const conversationData of CONVERSATIONS) {
-      console.log(`Creating conversation: ${conversationData.name}`);
+      console.log(`Creating conversation: ${conversationData.name}`)
 
       // Insert conversation
-      await db.insert(conversations).values({
+      await db.insert(agentSchema.conversations).values({
         id: conversationData.id,
         name: conversationData.name,
         userId: userId,
         messages: JSON.stringify(conversationData.messages || []),
         agentIds: JSON.stringify(conversationData.agentIds || []),
         updatedAt: new Date(),
-      });
+      })
 
       // Create conversation-agent relationships
       for (const agentId of conversationData.agentIds) {
-        await db.insert(conversationAgents).values({
+        await db.insert(agentSchema.conversationAgents).values({
           conversationId: conversationData.id,
           agentId: agentId,
-        });
+        })
 
-        console.log(`Linked agent ${agentId} to conversation ${conversationData.id}`);
+        console.log(`Linked agent ${agentId} to conversation ${conversationData.id}`)
       }
 
-      console.log(`Conversation created: ${conversationData.name}`);
+      console.log(`Conversation created: ${conversationData.name}`)
     }
 
-    console.log("Conversations seeded successfully");
+    console.log("Conversations seeded successfully")
   } catch (error) {
-    console.error("Error seeding conversations:", error);
-    throw error;
+    console.error("Error seeding conversations:", error)
+    throw error
   }
 }
 
@@ -710,21 +568,21 @@ async function seedConversations(userId: string) {
  * Run database migrations to ensure tables exist
  */
 async function runMigrations() {
-  console.log("Running database migrations...");
-  
+  console.log("Running database migrations...")
+
   try {
     // Define migrations path - adjust if your migrations are elsewhere
-    const migrationsFolder = path.join(process.cwd(), 'migrations');
-    console.log(`Using migrations from: ${migrationsFolder}`);
-    
+    const migrationsFolder = path.resolve(process.cwd(), "migrations")
+    console.log(`Using migrations from: ${migrationsFolder}`)
+
     // Run migrations
-    await migrate(db, { migrationsFolder });
-    console.log("Migrations completed successfully");
-    
-    return true;
+    await migrate(db, { migrationsFolder })
+    console.log("Migrations completed successfully")
+
+    return true
   } catch (error) {
-    console.error("Migration error:", error);
-    throw error;
+    console.error("Migration error:", error)
+    throw error
   }
 }
 
@@ -732,10 +590,13 @@ async function runMigrations() {
  * Create tables manually if migrations fail
  */
 async function createTablesManually() {
-  console.log("Creating tables manually...");
-  
+  console.log("Creating tables manually...")
+
   try {
-    // Create users table
+    // We'll use the schema definitions from the schema files to create tables
+    // This ensures consistency with the application's expected schema
+
+    // Create user table
     await client.execute(`
       CREATE TABLE IF NOT EXISTS user (
         id TEXT PRIMARY KEY NOT NULL,
@@ -744,9 +605,9 @@ async function createTablesManually() {
         emailVerified INTEGER,
         image TEXT
       )
-    `);
-    console.log("Created user table");
-    
+    `)
+    console.log("Created user table")
+
     // Create AI providers table
     await client.execute(`
       CREATE TABLE IF NOT EXISTS ai_providers (
@@ -766,9 +627,9 @@ async function createTablesManually() {
         updated_at INTEGER,
         FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE SET NULL
       )
-    `);
-    console.log("Created ai_providers table");
-    
+    `)
+    console.log("Created ai_providers table")
+
     // Create provider models table
     await client.execute(`
       CREATE TABLE IF NOT EXISTS provider_models (
@@ -791,9 +652,9 @@ async function createTablesManually() {
         FOREIGN KEY (provider_id) REFERENCES ai_providers(id) ON DELETE CASCADE,
         UNIQUE(provider_id, model)
       )
-    `);
-    console.log("Created provider_models table");
-    
+    `)
+    console.log("Created provider_models table")
+
     // Create agents table
     await client.execute(`
       CREATE TABLE IF NOT EXISTS agents (
@@ -824,9 +685,9 @@ async function createTablesManually() {
         FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
         UNIQUE(name, user_id)
       )
-    `);
-    console.log("Created agents table");
-    
+    `)
+    console.log("Created agents table")
+
     // Create conversations table
     await client.execute(`
       CREATE TABLE IF NOT EXISTS conversation (
@@ -839,9 +700,9 @@ async function createTablesManually() {
         updatedAt INTEGER,
         FOREIGN KEY (userId) REFERENCES user(id) ON DELETE CASCADE
       )
-    `);
-    console.log("Created conversation table");
-    
+    `)
+    console.log("Created conversation table")
+
     // Create conversation_agent table
     await client.execute(`
       CREATE TABLE IF NOT EXISTS conversation_agent (
@@ -851,78 +712,78 @@ async function createTablesManually() {
         FOREIGN KEY (conversationId) REFERENCES conversation(id) ON DELETE CASCADE,
         FOREIGN KEY (agentId) REFERENCES agents(id) ON DELETE CASCADE
       )
-    `);
-    console.log("Created conversation_agent table");
-    
-    return true;
+    `)
+    console.log("Created conversation_agent table")
+
+    return true
   } catch (error) {
-    console.error("Error creating tables manually:", error);
-    throw error;
+    console.error("Error creating tables manually:", error)
+    throw error
   }
 }
 
 /**
- * Enhanced database seeding function with proper error handling and transaction management
+ * Main seeding function with proper error handling
  */
-async function enhancedSeedDatabase() {
-  console.log("Starting enhanced database seeding...\n");
+async function seedDatabase() {
+  console.log("Starting database seeding...\n")
 
   try {
     // Step 0: Run migrations or create tables manually
     try {
-      await runMigrations();
+      await runMigrations()
     } catch (migrationError) {
-      console.log("Migrations failed, trying to create tables manually...");
-      await createTablesManually();
+      console.log("Migrations failed, trying to create tables manually...")
+      await createTablesManually()
     }
-    
+
     // Step 1: Ensure user exists
-    const userId = await ensureUserExists(SAMPLE_USER_ID);
+    const userId = await ensureUserExists(SAMPLE_USER_ID)
 
     // Step 2: Clear existing data
-    await clearExistingData();
+    await clearExistingData()
 
     // Step 3: Seed providers and models
-    await seedProviders();
+    await seedProviders()
 
     // Step 4: Get model IDs for each provider
-    const modelIds = await getModelIds();
+    const modelIds = await getModelIds()
 
     // Step 5: Seed agents
-    await seedAgents(userId, modelIds);
+    await seedAgents(userId, modelIds)
 
     // Step 6: Seed conversations and conversation-agent relationships
-    await seedConversations(userId);
+    await seedConversations(userId)
 
-    console.log("\nEnhanced database seeding completed successfully!");
+    console.log("\nDatabase seeding completed successfully!")
   } catch (error) {
-    console.error("\nSeeding failed:", error);
+    console.error("\nSeeding failed:", error)
 
     // Log more detailed error information
     if (error instanceof Error) {
-      console.error(`Error Name: ${error.name}`);
-      console.error(`Error Message: ${error.message}`);
-      console.error(`Error Stack: ${error.stack}`);
+      console.error(`Error Name: ${error.name}`)
+      console.error(`Error Message: ${error.message}`)
+      console.error(`Error Stack: ${error.stack}`)
     }
 
-    throw error;
+    throw error
   } finally {
     // Close the database connection when done
     try {
-      await client.close();
-      console.log("Database connection closed.");
+      await client.close()
+      console.log("Database connection closed.")
     } catch (e) {
-      console.error("Error closing database connection:", e);
+      console.error("Error closing database connection:", e)
     }
   }
 }
 
 // Run the seeding script if executed directly
 if (require.main === module) {
-  enhancedSeedDatabase().catch((error) => {
-    console.error("Fatal error during database seeding:", error);
-    process.exit(1);
-  });
+  seedDatabase().catch((error) => {
+    console.error("Fatal error during database seeding:", error)
+    process.exit(1)
+  })
 }
 
-export { enhancedSeedDatabase };
+export { seedDatabase }
