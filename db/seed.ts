@@ -1,22 +1,63 @@
-// db/enhanced-seed.ts
-import "@/envConfig"
-import {
-  db,
-  aiProviders,
-  providerModels,
-  agents,
-  conversations,
-  conversationAgents,
-  users,
-} from "@/db/schema"
-import { nanoid } from "@/lib/nanoid"
-import { eq } from "drizzle-orm"
+// db/seed.ts
+import dotenv from "dotenv";
+// Load environment variables from .env file
+dotenv.config();
+
+// Direct database connection for seeding
+import { createClient } from "@libsql/client";
+import { drizzle } from "drizzle-orm/libsql";
+import { migrate } from "drizzle-orm/libsql/migrator";
+import { eq } from "drizzle-orm";
+import path from "path";
+
+// Import schema directly from the files
+import { users } from "./schema/users";
+import { 
+  aiProviders, 
+  providerModels, 
+  agents, 
+  conversations, 
+  conversationAgents 
+} from "./schema/agentconversation";
+
+// Create a direct database connection for the seed script
+const client = createClient({
+  url: process.env.DATABASE_URL || "file:./local.db",
+  authToken: process.env.TURSO_AUTH_TOKEN,
+});
+
+// Initialize drizzle with our client
+const db = drizzle(client);
 
 // Define fixed IDs for consistency across runs
 const SAMPLE_USER_ID = "00304d53-a335-4012-9caa-4bca2beab1b9" // Use this as your user ID
 const OPENAI_PROVIDER_ID = "5f321ec3-a32d-4f17-b4f4-48e94edb9c51"
 const ANTHROPIC_PROVIDER_ID = "7c843e18-6d86-46d4-b5b2-91dae6a383e4"
 const MISTRAL_PROVIDER_ID = "a5834a25-2faf-4ac7-abfc-5c4e7a7619d5"
+
+// Generate a unique ID
+function nanoid(size: number = 21): string {
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+  let id = ""
+
+  // Crypto API for more secure random values when available
+  if (typeof crypto !== "undefined") {
+    const bytes = new Uint8Array(size)
+    crypto.getRandomValues(bytes)
+
+    for (let i = 0; i < size; i++) {
+      id += alphabet[bytes[i] % alphabet.length]
+    }
+    return id
+  }
+
+  // Fallback to Math.random() if crypto is not available
+  for (let i = 0; i < size; i++) {
+    id += alphabet[Math.floor(Math.random() * alphabet.length)]
+  }
+
+  return id
+}
 
 // Default provider configurations with realistic model listings
 const PROVIDERS = [
@@ -384,7 +425,18 @@ const CONVERSATIONS = [
       {
         role: "assistant",
         content:
-          "That's a solid overview of the ethical landscape. Let me structure this into a more formal ethical framework with arguments for different perspectives:\n\n### Thesis: AI Agent Development Requires Rigorous Ethical Guardrails\n\n**Argument 1: Transparency vs. Immersion**\n- *Position A:* Complete transparency about AI nature is always necessary to prevent deception\n- *Position B:* Some level of immersion is valuable for effective interaction, especially in roleplay contexts\n- *Synthesis:* Initial disclosure with opt-in immersion provides both ethical clarity and user experience benefits\n\n**Argument 2: Responsibility for Generated Content**\n- *Position A:* Developers bear full responsibility for any content their agents generate\n- *Position B:* Users share responsibility when they intentionally prompt controversial content\n- *Position C:* The distributed nature of AI development creates collective responsibility\n- *Evidence:* The Microsoft Tay incident demonstrates how user interaction can transform agent behavior\n\n**Argument 3: Personification and Psychological Effects**\n- *Position A:* Creating distinct agent personalities encourages unhealthy attachment\n- *Position B:* Personified agents provide more engaging and effective user experiences\n- *Counterpoint:* Research on human-AI interaction shows both beneficial and potentially harmful psychological effects\n- *Key Question:* Who should determine the appropriate boundaries? Developers, regulators, or users?\n\n**Argument 4: Cultural and Historical Representation**\n- *Position A:* AI agents representing historical figures risk misrepresenting complex views\n- *Position B:* Well-researched historical agents can democratize access to philosophical traditions\n- *Nuance:* Clear labeling of speculative vs. documented viewpoints is essential\n\n### Critical Tensions to Address:\n\n1. **Agency vs. Control**: How much should developers restrict agent capabilities vs. allowing emergent behaviors?\n\n2. **Innovation vs. Caution**: What is the appropriate balance between rapid development and careful ethical consideration?\n\n3. **Global Perspectives**: How can developers ensure ethical frameworks incorporate diverse cultural values?\n\nA robust approach would include:\n- Structured ethical review processes before agent deployment\n- Ongoing monitoring of agent interactions\n- Clear mechanisms for user feedback and redress\n- Transparency about limitations and design decisions\n- Regular ethical audits by diverse stakeholders\n\nWhat specific aspect of AI agent ethics would you like to debate further?",
+          "That's a solid overview of the ethical landscape. Let me structure this into a more formal ethical framework with arguments for different perspectives:\n\n### Thesis: AI Agent Development Requires Rigorous Ethical Guardrails\n\n**Argument 1: Transparency vs. Immersion**\n- *Position A:* Complete transparency about AI nature is always necessary to prevent deception\n- *Position B:* Some level of immersion is valuable for effective interaction, especially in roleplay contexts\n- *Synthesis:* Initial disclosure with opt-in immersion provides both ethical clarity and user experience benefits\n\n**Argument 2: Responsibility for Generated Content**\n- *Position A:* Developers bear full responsibility for any content their agents generate\n- *Position B:* Users share responsibility when they intentionally prompt controversial content\n- *Position C:* The distributed nature of AI development creates collective responsibility\n- *Evidence:* The Microsoft Tay incident demonstrates how user interaction can transform agent behavior\n\n**Argument 3: Personification and Psychological Effects**\n- *Position A:* Creating distinct agent personalities encourages unhealthy attachment\n- *Position B:* Personified agents provide more engaging and effective user experiences\n- *Counterpoint:* Research on human-AI interaction shows both beneficial and potentially harmful psychological effects\n- *Key Question:* Who should determine the appropriate boundaries? Developers, regulators, or users?\n\n**Argument 4: Cultural and Historical Representation**\n- *Position A:* AI agents representing historical figures risk misrepresenting complex views\n- *Position B:* Well-researched historical agents can democratize access to philosophical traditions\n- *Nuance:* Clear labeling of speculative vs. documented viewpoints is essential\n\n### Critical Tensions to Address:\n\n1. **Agency vs. Control**: How much should developers restrict agent capabilities vs. allowing emergent behaviors?
+
+2. **Innovation vs. Caution**: What is the appropriate balance between rapid development and careful ethical consideration?
+
+3. **Global Perspectives**: How can developers ensure ethical frameworks incorporate diverse cultural values?
+
+A robust approach would include:
+- Structured ethical review processes before agent deployment
+- Ongoing monitoring of agent interactions
+- Clear mechanisms for user feedback and redress
+- Transparency about limitations and design decisions
+- Regular ethical audits by diverse stakeholders\n\nWhat specific aspect of AI agent ethics would you like to debate further?",
         agentId: AGENTS[7].id, // Debate Coach
         createdAt: Date.now() - 259000000,
       },
@@ -397,24 +449,30 @@ const CONVERSATIONS = [
  */
 async function ensureUserExists(userId: string) {
   try {
-    const existingUsers = await db.select().from(users).where(eq(users.id, userId)).limit(1)
+    // Check if the database connection is properly initialized
+    if (!db || typeof db.select !== 'function') {
+      throw new Error("Database connection not properly initialized");
+    }
+
+    console.log("Checking for existing user with ID:", userId);
+    const existingUsers = await db.select().from(users).where(eq(users.id, userId)).limit(1);
 
     if (existingUsers.length === 0) {
-      console.log("Creating sample user...")
+      console.log("Creating sample user...");
       await db.insert(users).values({
         id: userId,
         name: "Sample User",
         email: "user@example.com",
-      })
-      console.log(`Created user with ID: ${userId}`)
+      });
+      console.log(`Created user with ID: ${userId}`);
     } else {
-      console.log("Using existing sample user...")
+      console.log("Using existing sample user...");
     }
 
-    return userId
+    return userId;
   } catch (error) {
-    console.error("Error ensuring user exists:", error)
-    throw error
+    console.error("Error ensuring user exists:", error);
+    throw error;
   }
 }
 
@@ -423,19 +481,48 @@ async function ensureUserExists(userId: string) {
  */
 async function clearExistingData() {
   try {
-    console.log("Clearing existing data...")
+    console.log("Clearing existing data...");
 
-    // Clear in proper order to respect foreign key constraints
-    await db.delete(conversationAgents)
-    await db.delete(conversations)
-    await db.delete(agents)
-    await db.delete(providerModels)
-    await db.delete(aiProviders)
+    try {
+      // Clear in proper order to respect foreign key constraints
+      await db.delete(conversationAgents);
+      console.log("Cleared conversation agents");
+    } catch (e) {
+      console.log("No conversation agents to clear or table doesn't exist yet");
+    }
 
-    console.log("Existing data cleared successfully")
+    try {
+      await db.delete(conversations);
+      console.log("Cleared conversations");
+    } catch (e) {
+      console.log("No conversations to clear or table doesn't exist yet");
+    }
+
+    try {
+      await db.delete(agents);
+      console.log("Cleared agents");
+    } catch (e) {
+      console.log("No agents to clear or table doesn't exist yet");
+    }
+
+    try {
+      await db.delete(providerModels);
+      console.log("Cleared provider models");
+    } catch (e) {
+      console.log("No provider models to clear or table doesn't exist yet");
+    }
+
+    try {
+      await db.delete(aiProviders);
+      console.log("Cleared AI providers");
+    } catch (e) {
+      console.log("No AI providers to clear or table doesn't exist yet");
+    }
+
+    console.log("Existing data cleared successfully");
   } catch (error) {
-    console.error("Error clearing existing data:", error)
-    throw error
+    console.error("Error clearing existing data:", error);
+    throw error;
   }
 }
 
@@ -444,11 +531,11 @@ async function clearExistingData() {
  */
 async function seedProviders() {
   try {
-    console.log("Seeding providers and models...")
+    console.log("Seeding providers and models...");
 
     // Insert each provider and its models
     for (const providerData of PROVIDERS) {
-      console.log(`Inserting provider: ${providerData.name}`)
+      console.log(`Inserting provider: ${providerData.name}`);
 
       // Insert provider
       await db.insert(aiProviders).values({
@@ -462,13 +549,13 @@ async function seedProviders() {
         configSchema: "{}",
         createdAt: new Date(),
         updatedAt: new Date(),
-      })
+      });
 
-      console.log(`Provider inserted with ID: ${providerData.id}`)
+      console.log(`Provider inserted with ID: ${providerData.id}`);
 
       // Insert models for this provider
       for (const model of providerData.models) {
-        console.log(`Inserting model: ${model.model}`)
+        console.log(`Inserting model: ${model.model}`);
 
         await db.insert(providerModels).values({
           id: nanoid(),
@@ -483,16 +570,16 @@ async function seedProviders() {
           isExperimental: model.isExperimental || false,
           createdAt: new Date(),
           updatedAt: new Date(),
-        })
+        });
 
-        console.log(`Model inserted: ${model.model}`)
+        console.log(`Model inserted: ${model.model}`);
       }
     }
 
-    console.log("Providers and models seeded successfully")
+    console.log("Providers and models seeded successfully");
   } catch (error) {
-    console.error("Error seeding providers:", error)
-    throw error
+    console.error("Error seeding providers:", error);
+    throw error;
   }
 }
 
@@ -501,7 +588,7 @@ async function seedProviders() {
  */
 async function getModelIds() {
   try {
-    const modelIds: Record<string, string> = {}
+    const modelIds: Record<string, string> = {};
 
     // Get a model ID for each provider
     for (const provider of PROVIDERS) {
@@ -509,19 +596,19 @@ async function getModelIds() {
         .select({ id: providerModels.id })
         .from(providerModels)
         .where(eq(providerModels.providerId, provider.id))
-        .limit(1)
+        .limit(1);
 
       if (models.length > 0) {
-        modelIds[provider.id] = models[0].id
+        modelIds[provider.id] = models[0].id;
       } else {
-        console.warn(`No models found for provider ${provider.id}`)
+        console.warn(`No models found for provider ${provider.id}`);
       }
     }
 
-    return modelIds
+    return modelIds;
   } catch (error) {
-    console.error("Error getting model IDs:", error)
-    throw error
+    console.error("Error getting model IDs:", error);
+    throw error;
   }
 }
 
@@ -530,18 +617,18 @@ async function getModelIds() {
  */
 async function seedAgents(userId: string, modelIds: Record<string, string>) {
   try {
-    console.log("Seeding agents...")
+    console.log("Seeding agents...");
 
     for (const agentData of AGENTS) {
-      console.log(`Inserting agent: ${agentData.name}`)
+      console.log(`Inserting agent: ${agentData.name}`);
 
-      const modelId = modelIds[agentData.providerId]
+      const modelId = modelIds[agentData.providerId];
 
       if (!modelId) {
         console.warn(
           `No model found for provider ${agentData.providerId}, skipping agent ${agentData.name}`
-        )
-        continue
+        );
+        continue;
       }
 
       await db.insert(agents).values({
@@ -567,15 +654,15 @@ async function seedAgents(userId: string, modelIds: Record<string, string>) {
         version: "1.0",
         createdAt: new Date(),
         updatedAt: new Date(),
-      })
+      });
 
-      console.log(`Agent inserted: ${agentData.name} (${agentData.id})`)
+      console.log(`Agent inserted: ${agentData.name} (${agentData.id})`);
     }
 
-    console.log("Agents seeded successfully")
+    console.log("Agents seeded successfully");
   } catch (error) {
-    console.error("Error seeding agents:", error)
-    throw error
+    console.error("Error seeding agents:", error);
+    throw error;
   }
 }
 
@@ -584,10 +671,10 @@ async function seedAgents(userId: string, modelIds: Record<string, string>) {
  */
 async function seedConversations(userId: string) {
   try {
-    console.log("Seeding conversations...")
+    console.log("Seeding conversations...");
 
     for (const conversationData of CONVERSATIONS) {
-      console.log(`Creating conversation: ${conversationData.name}`)
+      console.log(`Creating conversation: ${conversationData.name}`);
 
       // Insert conversation
       await db.insert(conversations).values({
@@ -597,25 +684,180 @@ async function seedConversations(userId: string) {
         messages: JSON.stringify(conversationData.messages || []),
         agentIds: JSON.stringify(conversationData.agentIds || []),
         updatedAt: new Date(),
-      })
+      });
 
       // Create conversation-agent relationships
       for (const agentId of conversationData.agentIds) {
         await db.insert(conversationAgents).values({
           conversationId: conversationData.id,
           agentId: agentId,
-        })
+        });
 
-        console.log(`Linked agent ${agentId} to conversation ${conversationData.id}`)
+        console.log(`Linked agent ${agentId} to conversation ${conversationData.id}`);
       }
 
-      console.log(`Conversation created: ${conversationData.name}`)
+      console.log(`Conversation created: ${conversationData.name}`);
     }
 
-    console.log("Conversations seeded successfully")
+    console.log("Conversations seeded successfully");
   } catch (error) {
-    console.error("Error seeding conversations:", error)
-    throw error
+    console.error("Error seeding conversations:", error);
+    throw error;
+  }
+}
+
+/**
+ * Run database migrations to ensure tables exist
+ */
+async function runMigrations() {
+  console.log("Running database migrations...");
+  
+  try {
+    // Define migrations path - adjust if your migrations are elsewhere
+    const migrationsFolder = path.join(process.cwd(), 'migrations');
+    console.log(`Using migrations from: ${migrationsFolder}`);
+    
+    // Run migrations
+    await migrate(db, { migrationsFolder });
+    console.log("Migrations completed successfully");
+    
+    return true;
+  } catch (error) {
+    console.error("Migration error:", error);
+    throw error;
+  }
+}
+
+/**
+ * Create tables manually if migrations fail
+ */
+async function createTablesManually() {
+  console.log("Creating tables manually...");
+  
+  try {
+    // Create users table
+    await client.execute(`
+      CREATE TABLE IF NOT EXISTS user (
+        id TEXT PRIMARY KEY NOT NULL,
+        name TEXT,
+        email TEXT UNIQUE,
+        emailVerified INTEGER,
+        image TEXT
+      )
+    `);
+    console.log("Created user table");
+    
+    // Create AI providers table
+    await client.execute(`
+      CREATE TABLE IF NOT EXISTS ai_providers (
+        id TEXT PRIMARY KEY NOT NULL,
+        name TEXT NOT NULL,
+        base_url TEXT NOT NULL,
+        api_key TEXT NOT NULL,
+        is_private INTEGER NOT NULL DEFAULT 0,
+        user_id TEXT,
+        rate_limit_per_minute INTEGER NOT NULL DEFAULT 60,
+        usage_quota INTEGER,
+        status TEXT NOT NULL DEFAULT 'active',
+        auth_type TEXT NOT NULL DEFAULT 'api_key',
+        provider_type TEXT NOT NULL DEFAULT 'llm',
+        config_schema TEXT DEFAULT '{}',
+        created_at INTEGER,
+        updated_at INTEGER,
+        FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE SET NULL
+      )
+    `);
+    console.log("Created ai_providers table");
+    
+    // Create provider models table
+    await client.execute(`
+      CREATE TABLE IF NOT EXISTS provider_models (
+        id TEXT PRIMARY KEY NOT NULL,
+        provider_id TEXT NOT NULL,
+        model TEXT NOT NULL,
+        temperature REAL NOT NULL DEFAULT 0.7,
+        max_tokens INTEGER NOT NULL DEFAULT 4096,
+        top_p REAL NOT NULL DEFAULT 1.0,
+        context_window INTEGER NOT NULL DEFAULT 8192,
+        rate_limit INTEGER NOT NULL DEFAULT 60,
+        is_experimental INTEGER NOT NULL DEFAULT 0,
+        is_default INTEGER NOT NULL DEFAULT 0,
+        display_name TEXT,
+        capabilities TEXT DEFAULT '["chat"]',
+        cost_per_token REAL DEFAULT 0,
+        tokenizer TEXT DEFAULT 'gpt-3.5-turbo',
+        created_at INTEGER,
+        updated_at INTEGER,
+        FOREIGN KEY (provider_id) REFERENCES ai_providers(id) ON DELETE CASCADE,
+        UNIQUE(provider_id, model)
+      )
+    `);
+    console.log("Created provider_models table");
+    
+    // Create agents table
+    await client.execute(`
+      CREATE TABLE IF NOT EXISTS agents (
+        id TEXT PRIMARY KEY NOT NULL,
+        name TEXT NOT NULL,
+        description TEXT,
+        avatar TEXT,
+        provider_id TEXT NOT NULL,
+        model_id TEXT NOT NULL,
+        temperature REAL NOT NULL DEFAULT 0.7,
+        max_tokens INTEGER NOT NULL DEFAULT 4096,
+        top_p REAL NOT NULL DEFAULT 1.0,
+        frequency_penalty REAL NOT NULL DEFAULT 0.0,
+        system_prompt TEXT NOT NULL DEFAULT 'You are an AI assistant.',
+        persona TEXT NOT NULL DEFAULT '{}',
+        tool_access TEXT NOT NULL DEFAULT '[]',
+        memory_enabled INTEGER NOT NULL DEFAULT 0,
+        session_limit INTEGER NOT NULL DEFAULT 5,
+        user_id TEXT NOT NULL,
+        custom_model_params TEXT DEFAULT '{}',
+        visibility_scope TEXT NOT NULL DEFAULT 'private',
+        version TEXT DEFAULT '1.0',
+        category_tags TEXT DEFAULT '[]',
+        created_at INTEGER,
+        updated_at INTEGER,
+        FOREIGN KEY (provider_id) REFERENCES ai_providers(id) ON DELETE CASCADE,
+        FOREIGN KEY (model_id) REFERENCES provider_models(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
+        UNIQUE(name, user_id)
+      )
+    `);
+    console.log("Created agents table");
+    
+    // Create conversations table
+    await client.execute(`
+      CREATE TABLE IF NOT EXISTS conversation (
+        id TEXT PRIMARY KEY NOT NULL,
+        userId TEXT NOT NULL,
+        name TEXT NOT NULL,
+        coverImage TEXT,
+        messages TEXT NOT NULL,
+        agentIds TEXT NOT NULL,
+        updatedAt INTEGER,
+        FOREIGN KEY (userId) REFERENCES user(id) ON DELETE CASCADE
+      )
+    `);
+    console.log("Created conversation table");
+    
+    // Create conversation_agent table
+    await client.execute(`
+      CREATE TABLE IF NOT EXISTS conversation_agent (
+        conversationId TEXT NOT NULL,
+        agentId TEXT NOT NULL,
+        PRIMARY KEY (conversationId, agentId),
+        FOREIGN KEY (conversationId) REFERENCES conversation(id) ON DELETE CASCADE,
+        FOREIGN KEY (agentId) REFERENCES agents(id) ON DELETE CASCADE
+      )
+    `);
+    console.log("Created conversation_agent table");
+    
+    return true;
+  } catch (error) {
+    console.error("Error creating tables manually:", error);
+    throw error;
   }
 }
 
@@ -623,48 +865,64 @@ async function seedConversations(userId: string) {
  * Enhanced database seeding function with proper error handling and transaction management
  */
 async function enhancedSeedDatabase() {
-  console.log("Starting enhanced database seeding...\n")
+  console.log("Starting enhanced database seeding...\n");
 
   try {
+    // Step 0: Run migrations or create tables manually
+    try {
+      await runMigrations();
+    } catch (migrationError) {
+      console.log("Migrations failed, trying to create tables manually...");
+      await createTablesManually();
+    }
+    
     // Step 1: Ensure user exists
-    const userId = await ensureUserExists(SAMPLE_USER_ID)
+    const userId = await ensureUserExists(SAMPLE_USER_ID);
 
     // Step 2: Clear existing data
-    await clearExistingData()
+    await clearExistingData();
 
     // Step 3: Seed providers and models
-    await seedProviders()
+    await seedProviders();
 
     // Step 4: Get model IDs for each provider
-    const modelIds = await getModelIds()
+    const modelIds = await getModelIds();
 
     // Step 5: Seed agents
-    await seedAgents(userId, modelIds)
+    await seedAgents(userId, modelIds);
 
     // Step 6: Seed conversations and conversation-agent relationships
-    await seedConversations(userId)
+    await seedConversations(userId);
 
-    console.log("\nEnhanced database seeding completed successfully!")
+    console.log("\nEnhanced database seeding completed successfully!");
   } catch (error) {
-    console.error("\nSeeding failed:", error)
+    console.error("\nSeeding failed:", error);
 
     // Log more detailed error information
     if (error instanceof Error) {
-      console.error(`Error Name: ${error.name}`)
-      console.error(`Error Message: ${error.message}`)
-      console.error(`Error Stack: ${error.stack}`)
+      console.error(`Error Name: ${error.name}`);
+      console.error(`Error Message: ${error.message}`);
+      console.error(`Error Stack: ${error.stack}`);
     }
 
-    throw error
+    throw error;
+  } finally {
+    // Close the database connection when done
+    try {
+      await client.close();
+      console.log("Database connection closed.");
+    } catch (e) {
+      console.error("Error closing database connection:", e);
+    }
   }
 }
 
 // Run the seeding script if executed directly
 if (require.main === module) {
   enhancedSeedDatabase().catch((error) => {
-    console.error("Fatal error during database seeding:", error)
-    process.exit(1)
-  })
+    console.error("Fatal error during database seeding:", error);
+    process.exit(1);
+  });
 }
 
-export { enhancedSeedDatabase }
+export { enhancedSeedDatabase };

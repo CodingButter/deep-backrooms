@@ -6,9 +6,6 @@ import { loadEnvConfig } from "@next/env"
 
 const projectDir = process.cwd()
 loadEnvConfig(projectDir)
-
-console.log({ projectDir, env: process.env })
-
 const nextConfig: NextConfig = {
   env: {
     DATABASE_URL: process.env.DATABASE_URL,
