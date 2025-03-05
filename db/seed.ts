@@ -18,6 +18,7 @@ function createTursoClient() {
     throw new Error("DATABASE_URL is not set in environment variables")
   }
 
+  console.log("Connecting to database:", process.env.DATABASE_URL)
   return createClient({
     url: process.env.DATABASE_URL,
     authToken: process.env.TURSO_AUTH_TOKEN || undefined,
@@ -309,11 +310,16 @@ const CONVERSATIONS = [
 async function ensureUserExists(userId: string) {
   try {
     console.log("Checking for existing user with ID:", userId)
-    const existingUsers = await db
-      .select()
-      .from(userSchema.users)
-      .where(eq(userSchema.users.id, userId))
-      .limit(1)
+
+    // Log the actual table name from the schema
+    console.log("Using table name:", userSchema.users._.name)
+
+    // Debug: show the SQL query
+    const query = db.select().from(userSchema.users).where(eq(userSchema.users.id, userId)).limit(1)
+
+    console.log("Query SQL:", query.toSQL())
+
+    const existingUsers = await query
 
     if (existingUsers.length === 0) {
       console.log("Creating sample user...")
@@ -330,6 +336,12 @@ async function ensureUserExists(userId: string) {
     return userId
   } catch (error) {
     console.error("Error ensuring user exists:", error)
+    // Log table information for debugging
+    console.log("Schema table names:", {
+      users: userSchema.users._.name,
+      accounts: userSchema.accounts._.name,
+      sessions: userSchema.sessions._.name,
+    })
     throw error
   }
 }
@@ -575,10 +587,27 @@ async function runMigrations() {
     const migrationsFolder = path.resolve(process.cwd(), "migrations")
     console.log(`Using migrations from: ${migrationsFolder}`)
 
-    // Run migrations
-    await migrate(db, { migrationsFolder })
-    console.log("Migrations completed successfully")
+    // List migration files for debugging
+    try {
+      const fs = require("fs")
+      const migrationFiles = fs.readdirSync(migrationsFolder)
+      console.log("Migration files:", migrationFiles)
+    } catch (err) {
+      console.log("Could not list migration directory contents:", err)
+    }
 
+    // Run migrations with verbose logging
+    await migrate(db, {
+      migrationsFolder,
+      logger: {
+        logQuery: (query) => console.log(`Running migration query: ${query}`),
+        error: (message) => console.error(`Migration error: ${message}`),
+        warn: (message) => console.warn(`Migration warning: ${message}`),
+        log: (message) => console.log(`Migration log: ${message}`),
+      },
+    })
+
+    console.log("Migrations completed successfully")
     return true
   } catch (error) {
     console.error("Migration error:", error)
@@ -593,12 +622,17 @@ async function createTablesManually() {
   console.log("Creating tables manually...")
 
   try {
-    // We'll use the schema definitions from the schema files to create tables
-    // This ensures consistency with the application's expected schema
+    // Log the actual table names from schema
+    console.log("Table names from schema:", {
+      users: userSchema.users._.name,
+      aiProviders: agentSchema.aiProviders._.name,
+      conversations: agentSchema.conversations._.name,
+      agents: agentSchema.agents._.name,
+    })
 
-    // Create user table
+    // Create users table using the name from schema
     await client.execute(`
-      CREATE TABLE IF NOT EXISTS user (
+      CREATE TABLE IF NOT EXISTS ${userSchema.users._.name} (
         id TEXT PRIMARY KEY NOT NULL,
         name TEXT,
         email TEXT UNIQUE,
@@ -606,11 +640,11 @@ async function createTablesManually() {
         image TEXT
       )
     `)
-    console.log("Created user table")
+    console.log(`Created ${userSchema.users._.name} table`)
 
     // Create AI providers table
     await client.execute(`
-      CREATE TABLE IF NOT EXISTS ai_providers (
+      CREATE TABLE IF NOT EXISTS ${agentSchema.aiProviders._.name} (
         id TEXT PRIMARY KEY NOT NULL,
         name TEXT NOT NULL,
         base_url TEXT NOT NULL,
@@ -625,14 +659,14 @@ async function createTablesManually() {
         config_schema TEXT DEFAULT '{}',
         created_at INTEGER,
         updated_at INTEGER,
-        FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE SET NULL
+        FOREIGN KEY (user_id) REFERENCES ${userSchema.users._.name}(id) ON DELETE SET NULL
       )
     `)
-    console.log("Created ai_providers table")
+    console.log(`Created ${agentSchema.aiProviders._.name} table`)
 
     // Create provider models table
     await client.execute(`
-      CREATE TABLE IF NOT EXISTS provider_models (
+      CREATE TABLE IF NOT EXISTS ${agentSchema.providerModels._.name} (
         id TEXT PRIMARY KEY NOT NULL,
         provider_id TEXT NOT NULL,
         model TEXT NOT NULL,
@@ -649,15 +683,15 @@ async function createTablesManually() {
         tokenizer TEXT DEFAULT 'gpt-3.5-turbo',
         created_at INTEGER,
         updated_at INTEGER,
-        FOREIGN KEY (provider_id) REFERENCES ai_providers(id) ON DELETE CASCADE,
+        FOREIGN KEY (provider_id) REFERENCES ${agentSchema.aiProviders._.name}(id) ON DELETE CASCADE,
         UNIQUE(provider_id, model)
       )
     `)
-    console.log("Created provider_models table")
+    console.log(`Created ${agentSchema.providerModels._.name} table`)
 
     // Create agents table
     await client.execute(`
-      CREATE TABLE IF NOT EXISTS agents (
+      CREATE TABLE IF NOT EXISTS ${agentSchema.agents._.name} (
         id TEXT PRIMARY KEY NOT NULL,
         name TEXT NOT NULL,
         description TEXT,
@@ -680,17 +714,17 @@ async function createTablesManually() {
         category_tags TEXT DEFAULT '[]',
         created_at INTEGER,
         updated_at INTEGER,
-        FOREIGN KEY (provider_id) REFERENCES ai_providers(id) ON DELETE CASCADE,
-        FOREIGN KEY (model_id) REFERENCES provider_models(id) ON DELETE CASCADE,
-        FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
+        FOREIGN KEY (provider_id) REFERENCES ${agentSchema.aiProviders._.name}(id) ON DELETE CASCADE,
+        FOREIGN KEY (model_id) REFERENCES ${agentSchema.providerModels._.name}(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES ${userSchema.users._.name}(id) ON DELETE CASCADE,
         UNIQUE(name, user_id)
       )
     `)
-    console.log("Created agents table")
+    console.log(`Created ${agentSchema.agents._.name} table`)
 
     // Create conversations table
     await client.execute(`
-      CREATE TABLE IF NOT EXISTS conversation (
+      CREATE TABLE IF NOT EXISTS ${agentSchema.conversations._.name} (
         id TEXT PRIMARY KEY NOT NULL,
         userId TEXT NOT NULL,
         name TEXT NOT NULL,
@@ -698,22 +732,22 @@ async function createTablesManually() {
         messages TEXT NOT NULL,
         agentIds TEXT NOT NULL,
         updatedAt INTEGER,
-        FOREIGN KEY (userId) REFERENCES user(id) ON DELETE CASCADE
+        FOREIGN KEY (userId) REFERENCES ${userSchema.users._.name}(id) ON DELETE CASCADE
       )
     `)
-    console.log("Created conversation table")
+    console.log(`Created ${agentSchema.conversations._.name} table`)
 
     // Create conversation_agent table
     await client.execute(`
-      CREATE TABLE IF NOT EXISTS conversation_agent (
+      CREATE TABLE IF NOT EXISTS ${agentSchema.conversationAgents._.name} (
         conversationId TEXT NOT NULL,
         agentId TEXT NOT NULL,
         PRIMARY KEY (conversationId, agentId),
-        FOREIGN KEY (conversationId) REFERENCES conversation(id) ON DELETE CASCADE,
-        FOREIGN KEY (agentId) REFERENCES agents(id) ON DELETE CASCADE
+        FOREIGN KEY (conversationId) REFERENCES ${agentSchema.conversations._.name}(id) ON DELETE CASCADE,
+        FOREIGN KEY (agentId) REFERENCES ${agentSchema.agents._.name}(id) ON DELETE CASCADE
       )
     `)
-    console.log("Created conversation_agent table")
+    console.log(`Created ${agentSchema.conversationAgents._.name} table`)
 
     return true
   } catch (error) {
@@ -732,8 +766,17 @@ async function seedDatabase() {
     // Step 0: Run migrations or create tables manually
     try {
       await runMigrations()
+
+      // Verify a key table exists before continuing
+      try {
+        await client.execute(`SELECT count(*) FROM ${userSchema.users._.name} LIMIT 1`)
+        console.log("Tables verified to exist after migration")
+      } catch (verifyError) {
+        console.error("Tables don't exist after migration, creating manually:", verifyError)
+        await createTablesManually()
+      }
     } catch (migrationError) {
-      console.log("Migrations failed, trying to create tables manually...")
+      console.error("Migrations failed, creating tables manually:", migrationError)
       await createTablesManually()
     }
 
